@@ -1,6 +1,6 @@
 import wwObject from './wwObject.vue'
 
-const name = "ww-text";
+const name = "ww-row";
 const wwEnableMetrics = false;
 
 const addComponent = function () {
@@ -12,16 +12,103 @@ const addComponent = function () {
             {
                 type: name,
                 data: {
-                    text: {
-                        fr_FR: "Nouveau texte"
+                    config: {
+                        count: 3,
+                        xs: null,
+                        sm: [{
+                            offset: 1,
+                            width: 3,
+                            borders: [
+                                {
+                                    width: 1,
+                                    color: "#000000",
+                                    style: "solid"
+                                },
+                                {
+                                    width: 1,
+                                    color: "#000000",
+                                    style: "solid"
+                                },
+                                {
+                                    width: 1,
+                                    color: "#000000",
+                                    style: "solid"
+                                },
+                                {
+                                    width: 1,
+                                    color: "#000000",
+                                    style: "solid"
+                                },
+                            ]
+                        }, {
+                            offset: 0,
+                            width: 4,
+                            borders: [
+                                {
+                                    width: 1,
+                                    color: "#000000",
+                                    style: "solid"
+                                },
+                                {
+                                    width: 1,
+                                    color: "#000000",
+                                    style: "solid"
+                                },
+                                {
+                                    width: 1,
+                                    color: "#000000",
+                                    style: "solid"
+                                },
+                                {
+                                    width: 1,
+                                    color: "#000000",
+                                    style: "solid"
+                                },
+                            ]
+                        }, {
+                            offset: 2,
+                            width: 2,
+                            borders: [
+                                {
+                                    width: 1,
+                                    color: "#000000",
+                                    style: "solid"
+                                },
+                                {
+                                    width: 1,
+                                    color: "#000000",
+                                    style: "solid"
+                                },
+                                {
+                                    width: 1,
+                                    color: "#000000",
+                                    style: "solid"
+                                },
+                                {
+                                    width: 1,
+                                    color: "#000000",
+                                    style: "solid"
+                                },
+                            ]
+                        }
+                        ],
+                        md: null,
+                        lg: null
                     },
-                    tag: "div", //h1, quote, code, ...
-                    align: "",
-                    font: "",
-                    size: "",
-                    color: "",
-                    classes: [],
-                    children: []
+                    columns: [
+                        {
+                            background: null,
+                            wwObjects: []
+                        },
+                        {
+                            background: null,
+                            wwObjects: []
+                        },
+                        {
+                            background: null,
+                            wwObjects: []
+                        }
+                    ]
                 }
             },
             wwEnableMetrics
