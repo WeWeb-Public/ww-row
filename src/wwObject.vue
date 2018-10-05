@@ -1,19 +1,13 @@
 <template>
 
 	<div class="ww-row">
-
-		<div class='ww-column' v-for="(wwColmun, index) in wwObject.content.data.columns" :key="index" :column-index="index">
+		<div class='ww-column' v-for="(wwColmun, index) in wwObject.content.data.columns" :key="index" :column-index="index" v-bind:class="columnAlignClasses[index]">
 
 			<wwObject class='ww-column-bg' v-bind:ww-object="wwColmun.background" ww-category='background' ww-default-object-type='ww-color'></wwObject>
 
 			<div class='ww-column-style'>
 				<div class='ww-column-container'>
-					<div class='edition-padding'></div>
-					<div class='ww-column-wwobjects-container' v-for="wwObj in wwColmun.wwObjects" :key="wwObj.uniqueId">
-						<div class='ww-column-wwobject-container'>
-							<wwObject v-bind:ww-object="wwObj"></wwObject>
-						</div>
-					</div>
+					<wwObject v-bind:ww-object="wwObj" v-for="wwObj in wwColmun.wwObjects" :key="wwObj.uniqueId"></wwObject>
 				</div>
 			</div>
 
@@ -27,11 +21,12 @@
 export default {
 	name: "ww-row",
 	props: {
-		wwObject: Object
+		wwObject: Object,
+		wwAttrs: Object
 	},
 	data() {
 		return {
-
+			columnAlignClasses: []
 		};
 	},
 	watch: {
@@ -49,6 +44,9 @@ export default {
 		},
 
 		updateColumns() {
+
+			this.columnAlignClasses = [];
+
 			for (let i = 0; i < this.wwObject.content.data.config.count; i++) {
 
 				if (this.wwObject.content.data.columns.length < i + 1) {
@@ -65,11 +63,12 @@ export default {
 
 				let column = this.$el.querySelector('[column-index="' + i + '"]')
 
-				column.classList.add(this.getAlignSelfForColumn(i))
+				this.columnAlignClasses.push(this.getAlignSelfForColumn(i))
+				//column.classList.add(this.getAlignSelfForColumn(i))
 
 				let stylesToAdd = ''
 				stylesToAdd += this.convertStyleObjectsToString(this.getWidthAndOffset(i))
-				stylesToAdd += 'display:' + this.getHideForColumn(i) ? 'none;' : ';'
+				stylesToAdd += 'display:' + (this.getHideForColumn(i) ? 'none;' : ';')
 				stylesToAdd += 'order:' + this.getOrderForColumn(i) + ';'
 				column.style.cssText = stylesToAdd
 
@@ -80,8 +79,9 @@ export default {
 				stylesToAdd += this.convertStyleObjectsToString(this.getShadowStyleForColumn(i))
 				columnStyle.style.cssText = stylesToAdd
 
-				this.$el.style.minHeight = this.getRowHeight()
 			}
+
+			this.$el.style.height = this.getRowHeight();
 
 		},
 		onResize() {
@@ -291,7 +291,7 @@ export default {
 			//2 : center
 			//3 : bottom
 
-			let defaultAlign = "align-top";
+			let defaultAlign = "ww-column-align-top";
 
 			let alignList = { xs: null, sm: null, md: null, lg: null };
 
@@ -301,13 +301,13 @@ export default {
 					let align = this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].align
 					switch (align + "") {
 						case "1":
-							alignList[this.screenSizes[i]] = "align-top";
+							alignList[this.screenSizes[i]] = "ww-column-align-top";
 							break;
 						case "2":
-							alignList[this.screenSizes[i]] = "align-center";
+							alignList[this.screenSizes[i]] = "ww-column-align-center";
 							break;
 						case "3":
-							alignList[this.screenSizes[i]] = "align-bottom";
+							alignList[this.screenSizes[i]] = "ww-column-align-bottom";
 							break;
 						default:
 							break;
@@ -401,16 +401,19 @@ export default {
 		},
 		getRowHeight() {
 
-			const height = this.wwObject.content.data.config.height || 0
+			let defaultHeight = 'auto';
 
-			// var navbarHeight = wwNavbar.getHeight();
+			if (this.wwAttrs && this.wwAttrs.wwRowDefaultHeight) {
+				defaultHeight = this.wwAttrs.wwRowDefaultHeight;
+			}
 
-			// return (($(window).height() * height / 100) - navbarHeight);
-			return window.innerHeight * height / 100
+			return this.wwObject.content.data.config.height.value + this.wwObject.content.data.config.height.unit || defaultHeight;
 		},
 	},
 	mounted: function () {
 		this.init()
+
+		this.$emit('ww-loaded', this);
 	},
 	beforeDestroyed() {
 		window.removeEventListener('resize', this.onResize);
@@ -430,15 +433,15 @@ export default {
   position: relative;
 }
 
-.ww-row .ww-column.align-center .ww-column-container {
+.ww-row .ww-column.ww-column-align-center .ww-column-container {
   align-self: center;
 }
 
-.ww-row .ww-column.align-top .ww-column-container {
+.ww-row .ww-column.ww-column-align-top .ww-column-container {
   align-self: flex-start;
 }
 
-.ww-row .ww-column.align-bottom .ww-column-container {
+.ww-row .ww-column.ww-column-align-bottom .ww-column-container {
   align-self: flex-end;
 }
 
@@ -469,15 +472,5 @@ export default {
   position: relative;
   display: flex;
   width: 100%;
-}
-
-.ww-column .ww-column-wwobjects-container {
-  width: 100%;
-  position: relative;
-}
-
-.ww-column .ww-column-wwobject-container {
-  width: 100%;
-  position: relative;
 }
 </style>
