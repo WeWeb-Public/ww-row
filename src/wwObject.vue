@@ -21,13 +21,19 @@
 export default {
 	name: "ww-row",
 	props: {
-		wwObject: Object,
+		wwObjectRef: Object,
 		wwAttrs: Object
 	},
 	data() {
 		return {
 			columnAlignClasses: []
 		};
+	},
+	computed: {
+		wwObject() {
+			//return this.wwObjectRef.wwGet();
+			return this.$store.state.wwObjects[this.wwObjectRef.uniqueId];
+		},
 	},
 	watch: {
 		wwColumns() {
