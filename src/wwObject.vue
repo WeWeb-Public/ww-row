@@ -21,7 +21,7 @@
 export default {
 	name: "ww-row",
 	props: {
-		wwObjectRef: Object,
+		wwObject: Object,
 		wwAttrs: Object
 	},
 	data() {
@@ -30,10 +30,7 @@ export default {
 		};
 	},
 	computed: {
-		wwObject() {
-			//return this.wwObjectRef.wwGet();
-			return this.$store.state.wwObjects[this.wwObjectRef.uniqueId];
-		},
+
 	},
 	watch: {
 		wwColumns() {
