@@ -1,14 +1,21 @@
 <template>
 
-    <div class="ww-row">
+    <div class="ww-row" v-bind:style="getRowHeight()">
+        <!-- wwManager:start -->
+        <div class="ww-column-tab">
+            <span class="wwi wwi-align-right"></span>
+        </div>
+        <!-- wwManager:end -->
         <div class='ww-column' v-for="(wwColmun, index) in wwObject.content.data.columns" :key="index" :column-index="index" v-bind:class="columnAlignClasses[index]">
 
             <wwObject class='ww-column-bg' v-bind:ww-object="wwColmun.background" v-bind:section="section" ww-category='background' ww-default-object-type='ww-color'></wwObject>
 
             <div class='ww-column-style'>
-                <div class='ww-column-container'>
+
+                <wwLayoutColumn tag="div" ww-default="ww-image" v-bind:ww-list="wwColmun.wwObjects" class='ww-column-container'>
                     <wwObject v-for="wwObj in wwColmun.wwObjects" :key="wwObj.uniqueId" v-bind:ww-object="wwObj" v-bind:section="section"></wwObject>
-                </div>
+                </wwLayoutColumn>
+
             </div>
 
         </div>
@@ -44,7 +51,7 @@ export default {
             this.screenSizes = ['xs', 'sm', 'md', 'lg']
 
             window.addEventListener('resize', this.onResize);
-            this.updateColumns()
+            this.updateColumns();
         },
 
         updateColumns() {
@@ -84,8 +91,6 @@ export default {
                 columnStyle.style.cssText = stylesToAdd
 
             }
-
-            this.$el.style.height = this.getRowHeight();
 
         },
         onResize() {
@@ -405,19 +410,42 @@ export default {
         },
         getRowHeight() {
 
-            let defaultHeight = 'auto';
+            this.wwObject.content.data.config.height = this.wwObject.content.data.config.height || {};
 
-            if (this.wwAttrs && this.wwAttrs.wwRowDefaultHeight) {
-                defaultHeight = this.wwAttrs.wwRowDefaultHeight;
+            if (this.wwObject.content.data.config.height.value && this.wwObject.content.data.config.height.unit) {
+                return {
+                    'height': this.wwObject.content.data.config.height.value + this.wwObject.content.data.config.height.unit
+                }
             }
 
-            return this.wwObject.content.data.config.height.value + this.wwObject.content.data.config.height.unit || defaultHeight;
+            if (this.wwAttrs && this.wwAttrs.wwRowDefaultHeight) {
+                let height = this.wwAttrs.wwRowDefaultHeight;
+                if (window.CSS && window.CSS.supports && window.CSS.supports('--fake-var', 0)) {
+                    return {
+                        'height': 'calc(var(--vh, 1vh) * ' + height + ')'
+                    }
+                }
+                else {
+                    return {
+                        'height': height + 'vh'
+                    }
+                }
+
+            }
+
+            return {
+                'height': 'auto'
+            };
         },
     },
     mounted: function () {
         this.init()
 
         this.$emit('ww-loaded', this);
+
+        /* wwManager:start */
+        console.log("OUI MANAGER");
+        /* wwManager:end */
     },
     beforeDestroyed() {
         window.removeEventListener('resize', this.onResize);
@@ -454,6 +482,7 @@ export default {
   /*overflow: hidden;*/
   position: relative;
   display: flex;
+  pointer-events: none;
 }
 
 .ww-column .ww-column-container {
@@ -477,4 +506,26 @@ export default {
   display: flex;
   width: 100%;
 }
+
+/* wwManager:start */
+.ww-column-tab {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-radius: 20px 0 0 20px;
+  background-color: #d02e7c;
+  z-index: 10;
+  color: white;
+  height: 40px;
+  width: 45px;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+}
+
+.editing .ww-column-tab {
+  display: flex;
+}
+/* wwManager:end */
 </style>
