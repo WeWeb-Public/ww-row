@@ -42,7 +42,6 @@ export default {
     },
     watch: {
         wwColumns() {
-            console.log('JE REGARDE !!!!!')
             this.updateColumns()
         }
     },
@@ -443,9 +442,6 @@ export default {
 
         this.$emit('ww-loaded', this);
 
-        /* wwManager:start */
-        console.log("OUI MANAGER");
-        /* wwManager:end */
     },
     beforeDestroyed() {
         window.removeEventListener('resize', this.onResize);
