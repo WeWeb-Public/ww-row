@@ -8,12 +8,12 @@
         <!-- wwManager:end -->
         <div class='ww-column' v-for="(wwColmun, index) in wwObject.content.data.columns" :key="index" :column-index="index" v-bind:class="columnAlignClasses[index]">
 
-            <wwObject class='ww-column-bg' v-bind:ww-object="wwColmun.background" v-bind:section="section" ww-category='background' ww-default-object-type='ww-color'></wwObject>
+            <wwObject class='ww-column-bg' v-bind:ww-object="wwColmun.background" ww-category='background' ww-default-object-type='ww-color'></wwObject>
 
             <div class='ww-column-style'>
 
-                <wwLayoutColumn tag="div" ww-default="ww-image" v-bind:ww-list="wwColmun.wwObjects" class='ww-column-container'>
-                    <wwObject v-for="wwObj in wwColmun.wwObjects" :key="wwObj.uniqueId" v-bind:ww-object="wwObj" v-bind:section="section"></wwObject>
+                <wwLayoutColumn tag='div' ww-default="ww-image" :ww-list="wwColmun.wwObjects" v-on:ww-add="addWwObject(wwColmun.wwObjects, $event)" v-on:ww-remove="removeWwObject(wwColmun.wwObjects, $event)" class="ww-column-container ww-layout-column">
+                    <wwObject v-for="wwObj in wwColmun.wwObjects" :key="wwObj.uniqueId" v-bind:ww-object="wwObj"></wwObject>
                 </wwLayoutColumn>
 
             </div>
@@ -28,12 +28,12 @@
 export default {
     name: "ww-row",
     props: {
-        wwObject: Object,
-        section: Object,
+        wwObjectCtrl: Object,
         wwAttrs: Object
     },
     data() {
         return {
+            wwObject: this.wwObjectCtrl.get(),
             columnAlignClasses: []
         };
     },
@@ -47,6 +47,7 @@ export default {
     },
     methods: {
         init: function () {
+
             this.screenSizes = ['xs', 'sm', 'md', 'lg']
 
             window.addEventListener('resize', this.onResize);
@@ -102,7 +103,23 @@ export default {
             }
             return string
         },
-        // STYLE FUNCTIONS
+
+        /*=============================================m_ÔÔ_m=============================================\
+          ADD/REMOVE FUNCTIONS
+        \================================================================================================*/
+        addWwObject(wwObjectList, options) {
+            wwObjectList.splice(options.index, 0, options.wwObject);
+            this.wwObjectCtrl.update(this.wwObject);
+        },
+        removeWwObject(wwObjectList, options) {
+            wwObjectList.splice(options.index, 1);
+            this.wwObjectCtrl.update(this.wwObject);
+        },
+
+
+        /*=============================================m_ÔÔ_m=============================================\
+          STYLE FUNCTIONS
+        \================================================================================================*/
         getHideForColumn(columnIndex) {
             const defaultHide = false;
 
@@ -409,6 +426,10 @@ export default {
         },
         getRowHeight() {
 
+            if (!this.wwObject) {
+                return;
+            }
+
             this.wwObject.content.data.config.height = this.wwObject.content.data.config.height || {};
 
             if (this.wwObject.content.data.config.height.value && this.wwObject.content.data.config.height.unit) {
@@ -520,7 +541,7 @@ export default {
   font-size: 22px;
 }
 
-.editing .ww-column-tab {
+.ww-editing .ww-column-tab {
   display: flex;
 }
 /* wwManager:end */

@@ -1,4 +1,4 @@
-import wwObject from './wwObject.vue'
+import wwObject from './wwObjectRow.vue'
 
 const name = "ww-row";
 const wwEnableMetrics = false;
