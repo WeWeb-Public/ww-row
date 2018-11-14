@@ -15,80 +15,17 @@ const addComponent = function () {
                         count: 3,
                         xs: null,
                         sm: [{
-                            offset: 1,
-                            width: 3,
-                            borders: [
-                                {
-                                    width: 1,
-                                    color: "#000000",
-                                    style: "solid"
-                                },
-                                {
-                                    width: 1,
-                                    color: "#000000",
-                                    style: "solid"
-                                },
-                                {
-                                    width: 1,
-                                    color: "#000000",
-                                    style: "solid"
-                                },
-                                {
-                                    width: 1,
-                                    color: "#000000",
-                                    style: "solid"
-                                },
-                            ]
+                            offset: 0,
+                            width: 33.33,
+                            borders: []
                         }, {
                             offset: 0,
-                            width: 4,
-                            borders: [
-                                {
-                                    width: 1,
-                                    color: "#000000",
-                                    style: "solid"
-                                },
-                                {
-                                    width: 1,
-                                    color: "#000000",
-                                    style: "solid"
-                                },
-                                {
-                                    width: 1,
-                                    color: "#000000",
-                                    style: "solid"
-                                },
-                                {
-                                    width: 1,
-                                    color: "#000000",
-                                    style: "solid"
-                                },
-                            ]
+                            width: 33.33,
+                            borders: []
                         }, {
-                            offset: 2,
-                            width: 2,
-                            borders: [
-                                {
-                                    width: 1,
-                                    color: "#000000",
-                                    style: "solid"
-                                },
-                                {
-                                    width: 1,
-                                    color: "#000000",
-                                    style: "solid"
-                                },
-                                {
-                                    width: 1,
-                                    color: "#000000",
-                                    style: "solid"
-                                },
-                                {
-                                    width: 1,
-                                    color: "#000000",
-                                    style: "solid"
-                                },
-                            ]
+                            offset: 0,
+                            width: 33.33,
+                            borders: []
                         }
                         ],
                         md: null,

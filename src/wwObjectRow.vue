@@ -12,7 +12,7 @@
 
             <div class='ww-column-style'>
 
-                <wwLayoutColumn tag='div' ww-default="ww-image" :ww-list="wwColmun.wwObjects" v-on:ww-add="addWwObject(wwColmun.wwObjects, $event)" v-on:ww-remove="removeWwObject(wwColmun.wwObjects, $event)" class="ww-column-container ww-layout-column">
+                <wwLayoutColumn tag='div' ww-default="ww-image" :ww-list="wwColmun.wwObjects" class="ww-column-container ww-layout-column">
                     <wwObject v-for="wwObj in wwColmun.wwObjects" :key="wwObj.uniqueId" v-bind:ww-object="wwObj"></wwObject>
                 </wwLayoutColumn>
 
@@ -33,12 +33,14 @@ export default {
     },
     data() {
         return {
-            wwObject: this.wwObjectCtrl.get(),
-            columnAlignClasses: []
+            columnAlignClasses: [],
+            screenSizes: ['xs', 'sm', 'md', 'lg']
         };
     },
     computed: {
-
+        wwObject() {
+            return this.wwObjectCtrl.get();
+        }
     },
     watch: {
         wwColumns() {
@@ -47,17 +49,13 @@ export default {
     },
     methods: {
         init: function () {
-
-            this.screenSizes = ['xs', 'sm', 'md', 'lg']
-
             window.addEventListener('resize', this.onResize);
+
             this.updateColumns();
         },
 
-        updateColumns() {
-
-            this.columnAlignClasses = [];
-
+        correctColumns() {
+            let modifs = false;
             for (let i = 0; i < this.wwObject.content.data.config.count; i++) {
 
                 if (this.wwObject.content.data.columns.length < i + 1) {
@@ -65,12 +63,28 @@ export default {
                 }
 
                 if (!this.wwObject.content.data.columns[i].background) {
-                    this.wwObject.content.data.columns[i].background = null;
+                    this.wwObject.content.data.columns[i].background = wwLib.wwObject.getDefault({
+                        type: 'ww-color'
+                    });
+                    modifs = true;
                 }
 
                 if (!this.wwObject.content.data.columns[i].wwObjects) {
                     this.wwObject.content.data.columns[i].wwObjects = [];
+                    modifs = true;
                 }
+            }
+            if (modifs) {
+                this.wwObjectCtrl.update(this.wwObject);
+            }
+        },
+
+        updateColumns() {
+
+            this.columnAlignClasses = [];
+            this.correctColumns();
+
+            for (let i = 0; i < this.wwObject.content.data.config.count; i++) {
 
                 let column = this.$el.querySelector('[column-index="' + i + '"]')
 
@@ -103,19 +117,6 @@ export default {
             }
             return string
         },
-
-        /*=============================================m_ÔÔ_m=============================================\
-          ADD/REMOVE FUNCTIONS
-        \================================================================================================*/
-        addWwObject(wwObjectList, options) {
-            wwObjectList.splice(options.index, 0, options.wwObject);
-            this.wwObjectCtrl.update(this.wwObject);
-        },
-        removeWwObject(wwObjectList, options) {
-            wwObjectList.splice(options.index, 1);
-            this.wwObjectCtrl.update(this.wwObject);
-        },
-
 
         /*=============================================m_ÔÔ_m=============================================\
           STYLE FUNCTIONS
@@ -196,7 +197,9 @@ export default {
 
             for (let i = 0; i < this.screenSizes.length; i++) {
                 if (this.wwObject.content.data.config[this.screenSizes[i]]
-                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex] && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].borders) {
+                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]
+                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].borders
+                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].borders.length) {
                     var borders = this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].borders;
                     bordersStyleList[this.screenSizes[i]] = {
                         "border-top-width": borders[0].width + "px",
@@ -454,13 +457,16 @@ export default {
             }
 
             return {
-                'height': 'auto'
+                'height': 'auto',
+                'min-height': '50px'
             };
         },
     },
-    mounted: function () {
-        this.init()
-
+    created() {
+        this.correctColumns();
+    },
+    mounted() {
+        this.init();
         this.$emit('ww-loaded', this);
 
     },
