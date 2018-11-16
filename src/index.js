@@ -6,9 +6,8 @@ const wwEnableMetrics = false;
 const addComponent = function () {
     if (window.vm) {
 
-        wwLib.wwObject.registerContentType(
-            name,
-            {
+        wwLib.wwObject.register({
+            content: {
                 type: name,
                 data: {
                     config: {
@@ -47,8 +46,19 @@ const addComponent = function () {
                     ]
                 }
             },
-            wwEnableMetrics
-        );
+            enableMetrics: wwEnableMetrics,
+            /* wwManager:start */
+            cmsOptions: {
+                wwObjectPlus: false,
+                hoverClass: 'ww-row-hover',
+                menu: {
+                    options: {
+
+                    }
+                }
+            }
+            /* wwManager:end */
+        });
 
         window.vm.addComponent(name, wwObject);
 

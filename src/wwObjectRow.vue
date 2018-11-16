@@ -458,7 +458,7 @@ export default {
 
             return {
                 'height': 'auto',
-                'min-height': '50px'
+                'min-height': '60px'
             };
         },
     },
@@ -468,6 +468,8 @@ export default {
     mounted() {
         this.init();
         this.$emit('ww-loaded', this);
+
+
 
     },
     beforeDestroyed() {
@@ -521,7 +523,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  min-height: 50px;
+  min-height: 60px;
 }
 
 .ww-column .ww-column-style {
@@ -534,11 +536,11 @@ export default {
 .ww-column-tab {
   display: none;
   position: absolute;
-  top: 0;
+  top: 10px;
   right: 0;
   border-radius: 20px 0 0 20px;
   background-color: #d02e7c;
-  z-index: 10;
+  z-index: 51;
   color: white;
   height: 40px;
   width: 45px;
@@ -549,6 +551,22 @@ export default {
 
 .ww-editing .ww-column-tab {
   display: flex;
+}
+/* wwManager:end */
+</style>
+
+<style>
+/* wwManager:start */
+.ww-row-hover {
+  background-color: #2ec6ba30;
+  background: repeating-linear-gradient(
+    -45deg,
+    #2ec6ba30,
+    #2ec6ba30 10px,
+    #2ec6ba50 10px,
+    #2ec6ba50 11px
+  );
+  border-width: 5px !important;
 }
 /* wwManager:end */
 </style>
