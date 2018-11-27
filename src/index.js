@@ -52,9 +52,19 @@ const addComponent = function () {
                 wwObjectPlus: false,
                 hoverClass: 'ww-row-hover',
                 menu: {
-                    options: {
+                    options: [
+                        {
+                            name: 'WWLOAYOUTCOLUMN:ADD_BEFORE',
+                            text: {
+                                en_GB: 'Add before...',
+                                fr_FR: 'Ajouter avant...'
+                            },
+                            action: 'wwLayoutColumn:add'
+                        },
+                        {
 
-                    }
+                        },
+                    ]
                 }
             }
             /* wwManager:end */

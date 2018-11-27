@@ -6,14 +6,14 @@
             <span class="wwi wwi-align-right"></span>
         </div>
         <!-- wwManager:end -->
-        <div class='ww-column' v-for="(wwColmun, index) in wwObject.content.data.columns" :key="index" :column-index="index" v-bind:class="columnAlignClasses[index]">
+        <div class='ww-column' v-for="(wwColumn, index) in wwObject.content.data.columns" :key="index" :column-index="index" v-bind:class="columnAlignClasses[index]">
 
-            <wwObject class='ww-column-bg' v-bind:ww-object="wwColmun.background" ww-category='background' ww-default-object-type='ww-color'></wwObject>
+            <wwObject class='ww-column-bg' v-bind:ww-object="wwColumn.background" ww-category='background' ww-default-object-type='ww-color'></wwObject>
 
             <div class='ww-column-style'>
 
-                <wwLayoutColumn tag='div' ww-default="ww-image" :ww-list="wwColmun.wwObjects" class="ww-column-container ww-layout-column">
-                    <wwObject v-for="wwObj in wwColmun.wwObjects" :key="wwObj.uniqueId" v-bind:ww-object="wwObj"></wwObject>
+                <wwLayoutColumn tag='div' ww-default="ww-image" :ww-list="wwColumn.wwObjects" class="ww-column-container ww-layout-column" @ww-add="wwAdd(wwColumn.wwObjects, $event)" @ww-remove="wwRemove(wwColumn.wwObjects, $event)">
+                    <wwObject v-for="wwObj in wwColumn.wwObjects" :key="wwObj.uniqueId" v-bind:ww-object="wwObj"></wwObject>
                 </wwLayoutColumn>
 
             </div>
@@ -118,6 +118,14 @@ export default {
             return string
         },
 
+        wwAdd(list, options) {
+            list.splice(options.index, 0, options.wwObject);
+            this.wwObjectCtrl.update(this.wwObject);
+        },
+        wwRemove(list, options) {
+            list.splice(options.index, 1);
+            this.wwObjectCtrl.update(this.wwObject);
+        },
         /*=============================================m_ÔÔ_m=============================================\
           STYLE FUNCTIONS
         \================================================================================================*/
@@ -513,7 +521,7 @@ export default {
 .ww-column .ww-column-container {
   width: 100%;
   position: relative;
-  overflow: hidden;
+  /*overflow: hidden;*/
   /*padding: 5px;*/
 }
 
