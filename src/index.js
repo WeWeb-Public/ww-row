@@ -1,7 +1,6 @@
 import wwObject from './wwObjectRow.vue'
 
 const name = "ww-row";
-const wwEnableMetrics = false;
 
 const addComponent = function () {
     if (window.vm) {
@@ -46,12 +45,18 @@ const addComponent = function () {
                     ]
                 }
             },
-            enableMetrics: wwEnableMetrics,
+            upsales: {
+                wwAnalytics: {
+                    click: false
+                }
+            },
             /* wwManager:start */
             cmsOptions: {
-                wwObjectPlus: false,
-                hoverClass: 'ww-row-hover',
-                menu: {
+                wwObjectHover: {
+                    pluses: false,
+                    hoverClass: 'ww-row-hover',
+                },
+                wwObjectMenu: {
                     options: [
                         {
                             name: 'WWLOAYOUTCOLUMN:ADD_BEFORE',
