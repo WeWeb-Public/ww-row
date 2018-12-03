@@ -1,26 +1,24 @@
 <template>
-
     <div class="ww-row" v-bind:style="getRowHeight()">
         <!-- wwManager:start -->
         <div class="ww-column-tab">
             <span class="wwi wwi-align-right"></span>
         </div>
+
+        <div class="ww-columns-preview">
+            <div class="ww-column-preview" v-for="(wwColumnPreview, index) in previewColumns" :key="index" :style="wwColumnPreview" :class="{'margin': wwColumnPreview.isMargin}"></div>
+        </div>
         <!-- wwManager:end -->
-        <div class='ww-column' v-for="(wwColumn, index) in wwObject.content.data.columns" :key="index" :column-index="index" v-bind:class="columnAlignClasses[index]">
+        <div class="ww-column" v-for="(wwColumn, index) in wwObject.content.data.columns" :key="index" :column-index="index" :class="columnClasses[index]" :style="columnLayouts[index]">
+            <wwObject class="ww-column-bg" v-bind:ww-object="wwColumn.background" ww-category="background"></wwObject>
 
-            <wwObject class='ww-column-bg' v-bind:ww-object="wwColumn.background" ww-category='background' ww-default-object-type='ww-color'></wwObject>
-
-            <div class='ww-column-style'>
-
-                <wwLayoutColumn tag='div' ww-default="ww-image" :ww-list="wwColumn.wwObjects" class="ww-column-container ww-layout-column" @ww-add="wwAdd(wwColumn.wwObjects, $event)" @ww-remove="wwRemove(wwColumn.wwObjects, $event)">
+            <div class="ww-column-style" :style="columnStyles[index]">
+                <wwLayoutColumn tag="div" ww-default="ww-image" :ww-list="wwColumn.wwObjects" class="ww-column-container ww-layout-column" @ww-add="wwAdd(wwColumn.wwObjects, $event)" @ww-remove="wwRemove(wwColumn.wwObjects, $event)">
                     <wwObject v-for="wwObj in wwColumn.wwObjects" :key="wwObj.uniqueId" v-bind:ww-object="wwObj"></wwObject>
                 </wwLayoutColumn>
-
             </div>
-
         </div>
     </div>
-
 </template>
 
 
@@ -33,7 +31,10 @@ export default {
     },
     data() {
         return {
-            columnAlignClasses: [],
+            columnClasses: [],
+            columnLayouts: [],
+            columnStyles: [],
+            previewColumns: [],
             screenSizes: ['xs', 'sm', 'md', 'lg']
         };
     },
@@ -81,29 +82,65 @@ export default {
 
         updateColumns() {
 
-            this.columnAlignClasses = [];
+            this.columnClasses = [];
+            this.columnLayouts = [];
+            this.columnStyles = [];
+            this.previewColumns = [];
             this.correctColumns();
 
             for (let i = 0; i < this.wwObject.content.data.config.count; i++) {
 
-                let column = this.$el.querySelector('[column-index="' + i + '"]')
+                this.columnClasses.push(this.getAlignSelfForColumn(i))
 
-                this.columnAlignClasses.push(this.getAlignSelfForColumn(i))
-                //column.classList.add(this.getAlignSelfForColumn(i))
 
-                let stylesToAdd = ''
-                stylesToAdd += this.convertStyleObjectsToString(this.getWidthAndOffset(i))
-                stylesToAdd += 'display:' + (this.getHideForColumn(i) ? 'none;' : ';')
-                stylesToAdd += 'order:' + this.getOrderForColumn(i) + ';'
-                column.style.cssText = stylesToAdd
+                let width = this.getWidth(i);
+                let offset = this.getOffset(i);
+                let order = this.getOrderForColumn(i);
+                let hide = this.getHideForColumn(i);
 
-                let columnStyle = column.querySelector('.ww-column-style')
-                stylesToAdd = ''
-                stylesToAdd += this.convertStyleObjectsToString(this.getBordersStyleForColumn(i))
-                stylesToAdd += this.convertStyleObjectsToString(this.getRadiusStyleForColumn(i))
-                stylesToAdd += this.convertStyleObjectsToString(this.getShadowStyleForColumn(i))
-                columnStyle.style.cssText = stylesToAdd
+                if (!hide) {
+                    if (offset != '0%') {
+                        this.previewColumns.push({
+                            isMargin: true,
+                            "width": offset,
+                            "flex-basis": offset,
+                            order: order
+                        });
+                    }
+                    this.previewColumns.push(Object.assign({}, width, { order: order }));
+                }
 
+
+
+                let columnLayouts = width;
+                columnLayouts.marginLeft = offset;
+                columnLayouts.order = order;
+                if (hide) {
+                    columnLayouts.display = 'none';
+                }
+
+                this.columnLayouts.push(columnLayouts);
+
+
+
+                let columnStyles = this.getBordersStyleForColumn(i);
+                Object.assign(columnStyles, this.getRadiusStyleForColumn(i));
+                Object.assign(columnStyles, this.getShadowStyleForColumn(i));
+
+                this.columnStyles.push(columnStyles);
+
+            }
+
+            let pcTotal = 0;
+            for (let pc of this.previewColumns) {
+                pcTotal += parseFloat(pc.width);
+            }
+            if (pcTotal < 99) {
+                this.previewColumns.push({
+                    isMargin: true,
+                    "width": (100 - pcTotal) + '%',
+                    "flex-basis": (100 - pcTotal) + '%',
+                })
             }
 
         },
@@ -393,45 +430,65 @@ export default {
             }
 
         },
-        getWidthAndOffset(columnIndex) {
+        getWidth(columnIndex) {
 
-            let defaulWidthAndOffset = {
+            let defaulWidth = {
                 "width": "100%",
-                "flex-basis": "100%",
-                "margin-left": "0%"
+                "flex-basis": "100%"
             }
 
-            let widthAndOffsetList = { xs: null, sm: null, md: null, lg: null };
+            let widthList = { xs: null, sm: null, md: null, lg: null };
 
             for (let i = 0; i < this.screenSizes.length; i++) {
                 if (this.wwObject.content.data.config[this.screenSizes[i]]
                     && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]) {
                     let conf = this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]
-                    widthAndOffsetList[this.screenSizes[i]] = {
-                        /*
-                        "width": (conf.width - 0.1) + "%",
-                        "flex-basis": (conf.width - 0.1) + "%",
-                        "margin-left": Math.max((conf.offset - 0.1), 0) + "%"
-                        */
-
+                    widthList[this.screenSizes[i]] = {
                         "width": (conf.width) + "%",
                         "flex-basis": (conf.width) + "%",
-                        "margin-left": Math.max((conf.offset), 0) + "%"
                     }
                 }
             }
 
             if (window.innerWidth < 768) {
-                return widthAndOffsetList["xs"] || defaulWidthAndOffset
+                return widthList["xs"] || defaulWidth
             }
             else if (window.innerWidth >= 768 && window.innerWidth < 992) {
-                return widthAndOffsetList["sm"] || widthAndOffsetList["xs"] || defaulWidthAndOffset
+                return widthList["sm"] || widthList["xs"] || defaulWidth
             }
             else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
-                return widthAndOffsetList["md"] || widthAndOffsetList["sm"] || widthAndOffsetList["xs"] || defaulWidthAndOffset
+                return widthList["md"] || widthList["sm"] || widthList["xs"] || defaulWidth
             }
             else {
-                return widthAndOffsetList["lg"] || widthAndOffsetList["md"] || widthAndOffsetList["sm"] || widthAndOffsetList["xs"] || defaulWidthAndOffset
+                return widthList["lg"] || widthList["md"] || widthList["sm"] || widthList["xs"] || defaulWidth
+            }
+
+        },
+        getOffset(columnIndex) {
+
+            let defaulOffset = "0%"
+
+            let offsetList = { xs: null, sm: null, md: null, lg: null };
+
+            for (let i = 0; i < this.screenSizes.length; i++) {
+                if (this.wwObject.content.data.config[this.screenSizes[i]]
+                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]) {
+                    let conf = this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]
+                    offsetList[this.screenSizes[i]] = Math.max((conf.offset), 0) + "%"
+                }
+            }
+
+            if (window.innerWidth < 768) {
+                return offsetList["xs"] || defaulOffset
+            }
+            else if (window.innerWidth >= 768 && window.innerWidth < 992) {
+                return offsetList["sm"] || offsetList["xs"] || defaulOffset
+            }
+            else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
+                return offsetList["md"] || offsetList["sm"] || offsetList["xs"] || defaulOffset
+            }
+            else {
+                return offsetList["lg"] || offsetList["md"] || offsetList["sm"] || offsetList["xs"] || defaulOffset
             }
 
         },
@@ -488,77 +545,105 @@ export default {
 
 <style scoped>
 .ww-row {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  position: relative;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    position: relative;
 }
 
 .ww-row .ww-column.ww-column-align-center .ww-column-container {
-  align-self: center;
+    align-self: center;
 }
 
 .ww-row .ww-column.ww-column-align-top .ww-column-container {
-  align-self: flex-start;
+    align-self: flex-start;
 }
 
 .ww-row .ww-column.ww-column-align-bottom .ww-column-container {
-  align-self: flex-end;
+    align-self: flex-end;
 }
 
 .ww-column {
-  /*height: 100%;*/
-  /*overflow: hidden;*/
-  position: relative;
-  display: flex;
-  pointer-events: none;
+    /*height: 100%;*/
+    /*overflow: hidden;*/
+    position: relative;
+    display: flex;
+    pointer-events: none;
 }
 
 .ww-column .ww-column-container {
-  width: 100%;
-  position: relative;
-  /*overflow: hidden;*/
-  /*padding: 5px;*/
+    width: 100%;
+    position: relative;
+    /*overflow: hidden;*/
+    /*padding: 5px;*/
 }
 
 .ww-column .ww-column-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  min-height: 60px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 60px;
 }
 
 .ww-column .ww-column-style {
-  position: relative;
-  display: flex;
-  width: 100%;
+    position: relative;
+    display: flex;
+    width: 100%;
 }
 
 /* wwManager:start */
 .ww-column-tab {
-  display: none;
-  position: absolute;
-  top: 10px;
-  right: 0;
-  border-radius: 20px 0 0 20px;
-  background-color: #d02e7c;
-  z-index: 51;
-  color: white;
-  height: 40px;
-  width: 45px;
-  justify-content: center;
-  align-items: center;
-  font-size: 22px;
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 0;
+    border-radius: 20px 0 0 20px;
+    background-color: #d02e7c;
+    z-index: 51;
+    color: white;
+    height: 40px;
+    width: 45px;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
 }
 
 .ww-editing .ww-column-tab {
-  display: flex;
+    display: flex;
+}
+
+.ww-columns-preview {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 50;
+    pointer-events: none;
+}
+
+.ww-column-preview + .ww-column-preview {
+    border-left: 1px solid #03a9f457;
+}
+.ww-column-preview.margin {
+    background-color: #03a9f410;
+    /*background: repeating-linear-gradient(
+        45deg,
+        #ffffff00,
+        #ffffff00 30px,
+        #03a9f440 30px,
+        #03a9f440 31px
+    );*/
+}
+.ww-editing .ww-columns-preview {
+    display: flex;
 }
 /* wwManager:end */
 </style>
@@ -566,15 +651,15 @@ export default {
 <style>
 /* wwManager:start */
 .ww-row-hover {
-  background-color: #2ec6ba30;
-  background: repeating-linear-gradient(
-    -45deg,
-    #2ec6ba30,
-    #2ec6ba30 10px,
-    #2ec6ba50 10px,
-    #2ec6ba50 11px
-  );
-  border-width: 5px !important;
+    background-color: #2ec6ba30;
+    background: repeating-linear-gradient(
+        -45deg,
+        #2ec6ba30,
+        #2ec6ba30 10px,
+        #2ec6ba50 10px,
+        #2ec6ba50 11px
+    );
+    border-width: 5px !important;
 }
 /* wwManager:end */
 </style>

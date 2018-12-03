@@ -57,18 +57,52 @@ const addComponent = function () {
                     hoverClass: 'ww-row-hover',
                 },
                 wwObjectMenu: {
-                    options: [
-                        {
-                            name: 'WWLOAYOUTCOLUMN:ADD_BEFORE',
-                            text: {
-                                en_GB: 'Add before...',
-                                fr_FR: 'Ajouter avant...'
-                            },
-                            action: 'wwLayoutColumn:add'
-                        },
-                        {
+                    items: [
 
+
+
+                        {
+                            if: 'wwLayout',
+                            name: 'ADD_BEFORE',
+                            text: {
+                                en_GB: 'Before',
+                                fr_FR: 'Avant'
+                            },
+                            icon: 'wwi wwi-add',
+                            action: 'wwLayout:addBefore'
                         },
+                        {
+                            if: 'wwLayout',
+                            name: 'ADD_AFTER',
+                            text: {
+                                en_GB: 'After',
+                                fr_FR: 'Après'
+                            },
+                            icon: 'wwi wwi-add',
+                            action: 'wwLayout:addAfter'
+                        },
+
+                        {
+                            name: 'LAYOUT',
+                            text: {
+                                en_GB: 'Columns',
+                                fr_FR: 'Colonnes'
+                            },
+                            icon: 'wwi wwi-edit-margin',
+                            action: 'editColumns'
+                        },
+
+                        {
+                            name: 'OPTIONS',
+                            text: {
+                                en_GB: 'Options...',
+                                fr_FR: 'Options...'
+                            },
+                            icon: 'wwi wwi-edit-other',
+                            action: 'edit'
+                        },
+
+
                     ]
                 }
             }
