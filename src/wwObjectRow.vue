@@ -23,6 +23,12 @@
 
 
 <script>
+/* wwManager:start */
+import wwRowPopupLayout from './wwRowPopupLayout.vue';
+wwLib.wwPopups.addPopup('wwRowPopupLayout', wwRowPopupLayout);
+/* wwManager:end */
+
+
 export default {
     name: "ww-row",
     props: {
@@ -377,6 +383,7 @@ export default {
                             alignList[this.screenSizes[i]] = "ww-column-align-top";
                             break;
                         case "2":
+                        case "0":
                             alignList[this.screenSizes[i]] = "ww-column-align-center";
                             break;
                         case "3":
@@ -526,6 +533,46 @@ export default {
                 'min-height': '60px'
             };
         },
+
+        /* wwManager:start */
+        async editColumns() {
+
+            wwLib.wwPopups.addStory('WW_ROW_POPUP_LAYOUT', {
+                title: {
+                    en_GB: 'Columns',
+                    fr_FR: 'Colonnes'
+                },
+                type: 'wwRowPopupLayout',
+                buttons: {
+                    FINISH: {
+                        text: {
+                            en_GB: 'Finish',
+                            fr_FR: 'Terminer'
+                        },
+                        next: false
+                    }
+                }
+            });
+
+
+            const options = {
+                firstPage: 'WW_ROW_POPUP_LAYOUT',
+                data: {
+                    wwObject: this.wwObject
+                }
+            }
+
+            try {
+                const result = await wwLib.wwPopups.open(options)
+
+                console.log(result);
+            } catch (error) {
+
+                console.log('ERROR', result);
+            }
+
+        }
+        /* wwManager:end */
     },
     created() {
         this.correctColumns();

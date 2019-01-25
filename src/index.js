@@ -58,9 +58,6 @@ const addComponent = function () {
                 },
                 wwObjectMenu: {
                     items: [
-
-
-
                         {
                             if: 'wwLayout',
                             name: 'ADD_BEFORE',

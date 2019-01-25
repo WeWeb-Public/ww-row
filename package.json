@@ -6,6 +6,7 @@
     "scripts": {
         "build": "webpack --config webpack.config.js -p --env=build",
         "serve": "webpack-dev-server -d --inline --env=dev",
+        "serve-hot": "webpack-dev-server -d --inline --env=dev --hot --disableHostCheck=true --client-log-level=error",
         "upload": "weweb-upload"
     },
     "dependencies": {
