@@ -1,8 +1,8 @@
 <template>
     <div class="ww-row-popup-layout ww-scroll-bar">
         <div class="columns-count-container">
-            <wwManagerInput class="columns-count" label="Nombre de colonnes" outline="true" v-model="columnsCount"></wwManagerInput>
-            <wwManagerButton class="button" icon="wwi wwi-check" color="green" @click="applyColumnCount()">Appliquer</wwManagerButton>
+            <wwManagerInput class="columns-count" :label="wwLang.getText('columnsCount')" outline="true" v-model="columnsCount"></wwManagerInput>
+            <wwManagerButton class="button" color="blue" @click="applyColumnCount()">{{wwLang.getText('apply')}}</wwManagerButton>
         </div>
         <div class="screen-selector-container" :class="screen">
             <div class="screen xs" :class="{'active': screen == 'xs'}" @click="screen = 'xs'">
@@ -25,8 +25,9 @@
                         <div class="index">{{ index + 1 }}</div>
                         <div class="percent" v-if="parseInt(column.width)">{{ column.width + '%'}}</div>
                     </div>
-                    <div class="background" :style="getBackgroundStyle(column)"></div>
-                    <div class="borders" :style="getBorderStyle(column)"></div>
+                    <div class="background"></div>
+                    <!-- <div class="background" :style="getBackgroundStyle(column)"></div> -->
+                    <!-- <div class="borders" :style="getBorderStyle(column)"></div> -->
                     <div class="offset" :style="{'width': getOffsetWidth(column) + 'px'}">
                         <div class="percent" v-if="parseInt(column.offset)">{{ column.offset + '%'}}</div>
                     </div>
@@ -34,24 +35,26 @@
             </div>
         </div>
         <div class="ignore-config">
-            <div class="ignore">Ignorer la config pour cet écran :</div>
+            <div class="ignore">{{wwLang.getText('ignore')}}</div>
             <wwManagerRadio v-model="config[screen].ignore" :disabled="screen == 'xs'"></wwManagerRadio>
         </div>
         <div class="active-screen" v-if="config[screen].ignore">
-            Cet écran utilise la configuration&nbsp;
-            <b>{{wwManagerLang.getText(screenNames[activeScreen])}}</b>
+            {{wwLang.getText('currentConfig')}}&nbsp;
+            <b>{{wwLang.getText(screenNames[activeScreen])}}</b>
         </div>
+        <!--
         <div class="config-tabs" v-if="!config[screen].ignore">
-            <div class="tab" :class="{'active': mode == 'size'}" @click="mode = 'size'">Tailles</div>
-            <div class="tab" :class="{'active': mode == 'border'}" @click="mode = 'border'">Bordures</div>
-            <div class="tab" :class="{'active': mode == 'shadow'}" @click="mode = 'shadow'">Ombres</div>
+            <div class="tab" :class="{'active': mode == 'size'}" @click="mode = 'size'">{{wwLang.getText('sizes')}}</div>
+            <div class="tab" :class="{'active': mode == 'border'}" @click="mode = 'border'">{{wwLang.getText('borders')}}</div>
+            <div class="tab" :class="{'active': mode == 'shadow'}" @click="mode = 'shadow'">{{wwLang.getText('shadows')}}</div>
         </div>
+        -->
         <div class="config-container" v-if="!config[screen].ignore">
             <!-- SIZE -->
             <div class="config" v-if="mode == 'size'">
                 <div class="columns-count-container">
-                    <wwManagerButton class="button" color="blue" @click="resizeColumns(false)">Répartir</wwManagerButton>
-                    <wwManagerButton class="button" color="blue" @click="resizeColumns(true)">Répartir avec espaces</wwManagerButton>
+                    <wwManagerButton class="button" color="blue" @click="resizeColumns(false)">{{wwLang.getText('distribute')}}</wwManagerButton>
+                    <wwManagerButton class="button" color="blue" @click="resizeColumns(true)">{{wwLang.getText('distributeWithSpaces')}}</wwManagerButton>
                 </div>
                 <div class="columns">
                     <div class="column" v-for="(column, index) in screenCols" :key="index" :class="getColor(index)">
@@ -64,13 +67,13 @@
                             </div>
                         </div>
                         <div class="header">
-                            <div class="index">Colonne {{index + 1}}</div>
-                            <div class="hide">&nbsp;- Cacher :</div>
+                            <div class="index">{{wwLang.getText('column')}} {{index + 1}}</div>
+                            <div class="hide">&nbsp;- {{wwLang.getText('hide')}} :</div>
                             <wwManagerRadio class="hide-radio" v-model="column.hide"></wwManagerRadio>
                         </div>
                         <div class="content-size">
-                            <wwManagerInput :color="getColor(index)" label="Offset - %" v-model="column.offset"></wwManagerInput>
-                            <wwManagerInput :color="getColor(index)" label="Width - %" v-model="column.width"></wwManagerInput>
+                            <wwManagerInput :color="getColor(index)" :label="wwLang.getText('offset') +' - %'" v-model="column.offset"></wwManagerInput>
+                            <wwManagerInput :color="getColor(index)" :label="wwLang.getText('width') +' - %'" v-model="column.width"></wwManagerInput>
                             <wwManagerSelect class="select" v-model="column.align" :options="alignOptions"></wwManagerSelect>
                         </div>
                     </div>
@@ -78,6 +81,7 @@
             </div>
 
             <!-- BORDER -->
+            <!--
             <div class="config" v-if="mode == 'border'">
                 <div class="columns">
                     <div class="column" v-for="(column, index) in screenCols" :key="index" :class="getColor(index)">
@@ -90,23 +94,24 @@
                             </div>
                         </div>
                         <div class="header">
-                            <div class="index">Colonne {{index + 1}}</div>
+                            <div class="index">{{wwLang.getText('column')}} {{index + 1}}</div>
                         </div>
                         <div class="content-border">
                             <div class="border" v-for="i in 4" :key="i">
-                                <wwManagerInput :color="getColor(index)" outline="true" :label="wwManagerLang.getText(borderNames[i-1])" v-model="column.borders[i - 1].width" @change="setBorderStyle(column, i - 1, $event)"></wwManagerInput>
+                                <wwManagerInput :color="getColor(index)" outline="true" :label="wwLang.getText(borderNames[i-1])" v-model="column.borders[i - 1].width" @change="setBorderStyle(column, i - 1, $event)"></wwManagerInput>
                                 <wwManagerSelect class="select" v-model="column.borders[i - 1].style" :options="borderStyleOptions" @change="setBorderWidth(column, i - 1, $event)"></wwManagerSelect>
                                 <wwManagerColorSelect v-model="column.borders[i - 1].color"></wwManagerColorSelect>
                             </div>
                             <div class="radius">
-                                <wwManagerInput v-for="i in 4" :key="i" :color="getColor(index)" :label="wwManagerLang.getText(radiusNames[i-1])" v-model="column.radius[i - 1]" @change="$forceUpdate()"></wwManagerInput>
+                                <wwManagerInput v-for="i in 4" :key="i" :color="getColor(index)" :label="wwLang.getText(radiusNames[i-1])" v-model="column.radius[i - 1]" @change="$forceUpdate()"></wwManagerInput>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
+            -->
             <!-- SHADOW -->
+            <!--
             <div class="config" v-if="mode == 'shadow'">
                 <div class="columns">
                     <div class="column" v-for="(column, index) in screenCols" :key="index" :class="getColor(index)">
@@ -119,24 +124,27 @@
                             </div>
                         </div>
                         <div class="header">
-                            <div class="index">Colonne {{index + 1}}</div>
+                            <div class="index">{{wwLang.getText('column')}} {{index + 1}}</div>
                         </div>
                         <div class="content-shadow">
                             <wwManagerInput class="input small" :color="getColor(index)" outline="true" label="X - px" v-model="column.shadow.x" @change="$forceUpdate()"></wwManagerInput>
                             <wwManagerInput class="input small" :color="getColor(index)" outline="true" label="Y - px" v-model="column.shadow.y" @change="$forceUpdate()"></wwManagerInput>
-                            <wwManagerInput class="input" :color="getColor(index)" label="Blur - px" v-model="column.shadow.blur" @change="$forceUpdate()"></wwManagerInput>
-                            <wwManagerInput class="input" :color="getColor(index)" label="Spread - px" v-model="column.shadow.spread" @change="$forceUpdate()"></wwManagerInput>
+                            <wwManagerInput class="input" :color="getColor(index)" :label="wwLang.getText('blur') +' - px'" v-model="column.shadow.blur" @change="$forceUpdate()"></wwManagerInput>
+                            <wwManagerInput class="input" :color="getColor(index)" :label="wwLang.getText('spread') +' - px'" v-model="column.shadow.spread" @change="$forceUpdate()"></wwManagerInput>
                             <wwManagerColorSelect v-model="column.shadow.color" @change="$forceUpdate()"></wwManagerColorSelect>
                         </div>
                     </div>
                 </div>
             </div>
+            -->
         </div>
     </div>
 </template>
 
 
 <script>
+import langPopupLayout from './langPopupLayout.json';
+
 export default {
     name: "wwRowPopupLayout",
     props: {
@@ -144,26 +152,14 @@ export default {
     },
     data() {
         return {
-            wwManagerLang: wwLib.wwManagerLang,
+            wwLang: wwLib.wwManagerLang.use(langPopupLayout),
 
             screens: ['xs', 'sm', 'md', 'lg'],
             screenNames: {
-                xs: {
-                    en_GB: 'Mobile',
-                    fr_FR: 'Mobile'
-                },
-                sm: {
-                    en_GB: 'Tablet',
-                    fr_FR: 'Tablette'
-                },
-                md: {
-                    en_GB: 'Laptop',
-                    fr_FR: 'PC Portable'
-                },
-                lg: {
-                    en_GB: 'Desktop',
-                    fr_FR: 'Grand écran'
-                }
+                xs: 'mobile',
+                sm: 'tablet',
+                md: 'laptop',
+                lg: 'desktop'
             },
             screen: 'xs',
 
@@ -224,6 +220,11 @@ export default {
 
             copiedColumnConfig: {},
 
+            activeScreen: 'xs',
+
+            /*=============================================m_ÔÔ_m=============================================\
+              OPTIONS
+            \================================================================================================*/
             alignOptions: {
                 type: 'text',
                 values: [
@@ -302,44 +303,18 @@ export default {
             },
 
             borderNames: [
-                {
-                    en_GB: 'Top - px',
-                    fr_FR: 'Haut - px',
-                },
-                {
-                    en_GB: 'Left - px',
-                    fr_FR: 'Gauche - px',
-                },
-                {
-                    en_GB: 'Bottom - px',
-                    fr_FR: 'Bas - px',
-                },
-                {
-                    en_GB: 'Right - px',
-                    fr_FR: 'Droite - px',
-                }
+                'borderTop',
+                'borderLeft',
+                'borderBottom',
+                'borderRight'
             ],
 
             radiusNames: [
-                {
-                    en_GB: 'T/L - px',
-                    fr_FR: 'H/G - px',
-                },
-                {
-                    en_GB: 'T/R - px',
-                    fr_FR: 'H/D - px',
-                },
-                {
-                    en_GB: 'B/R - px',
-                    fr_FR: 'B/D - px',
-                },
-                {
-                    en_GB: 'B/L - px',
-                    fr_FR: 'B/G - px',
-                }
+                'radiusTopLeft',
+                'radiusTopRight',
+                'radiusBottomRight',
+                'radiusBottomLeft'
             ],
-
-            activeScreen: 'xs'
         };
     },
     computed: {
@@ -363,88 +338,13 @@ export default {
                 && this.options.data.wwObject.content.data.config ? this.options.data.wwObject.content.data.config : this.config;
 
             this.correctConfigs();
-            console.log(this.config)
 
             this.columnsCount = this.config.count;
         },
 
-        correctConfigs() {
-            this.config.count = this.config.count || 1;
-            this.config.height = this.config.height || null;
-
-            for (let screen of this.screens) {
-                if (!this.config[screen]) {
-                    this.config[screen] = {
-                        cols: []
-                    };
-                }
-
-                if (this.config[screen][0]) {
-                    this.config[screen] = {
-                        cols: this.config[screen]
-                    }
-                }
-
-                let cols = [];
-                for (let i = 0; i < this.config.count; i++) {
-                    let confCols = this.config[screen].cols;
-
-                    if (confCols.length > i) {
-                        confCols[i].align = confCols[i].align || "1";
-                        confCols[i].width = confCols[i].width || 100 / this.config.count;
-                        confCols[i].offset = confCols[i].offset || 0;
-                        confCols[i].borders = confCols[i].borders || JSON.parse(JSON.stringify(this.defaultBorders));
-                        confCols[i].radius = confCols[i].radius || JSON.parse(JSON.stringify(this.defaultRadius));
-                        confCols[i].shadow = confCols[i].shadow || JSON.parse(JSON.stringify(this.defaultShadow));
-
-                        cols.push(confCols[i]);
-                    }
-                    else {
-                        cols.push({
-                            align: "1",
-                            width: 100 / this.config.count,
-                            offset: 0,
-                            borders: JSON.parse(JSON.stringify(this.defaultBorders)),
-                            radius: JSON.parse(JSON.stringify(this.defaultRadius)),
-                            shadow: JSON.parse(JSON.stringify(this.defaultShadow))
-                        })
-                    }
-                }
-
-                this.config[screen].cols = cols;
-            }
-        },
-
-        applyColumnCount() {
-            try {
-                this.columnsCount = Math.min(Math.max(parseInt(this.columnsCount || 1) || 1, 1), 100);
-            } catch (error) {
-                this.columnsCount = 0;
-            }
-
-            this.config.count = this.columnsCount;
-
-            this.correctConfigs();
-        },
-
-        resizeColumns(offsets) {
-            let config = [];
-
-            let offset = offsets ? 2 : 0;
-
-            const offsetPerLine = offset * (Math.min(this.config.count, 10) + 1);
-
-            let width = Math.max(10 - offsetPerLine / 10, ((100 - offsetPerLine) / this.config.count));
-
-            for (let i = 0; i < this.config.count; i++) {
-                this.screenCols[i].width = width;
-                this.screenCols[i].offset = offset;
-                config.push(this.screenCols[i]);
-            }
-
-            this.config[this.screen].cols = config;
-        },
-
+        /*=============================================m_ÔÔ_m=============================================\
+          ROW STYLE
+        \================================================================================================*/
         getStyle(column) {
             let align;
             switch (column.align) {
@@ -471,6 +371,7 @@ export default {
             return style;
         },
 
+        /*
         getBorderStyle(column) {
             let style = {};
 
@@ -519,13 +420,56 @@ export default {
 
             return style;
         },
+        */
 
-        getOffsetWidth(column) {
-            if (!this.$el) {
-                return 0;
+        /*=============================================m_ÔÔ_m=============================================\
+          CONFIG
+        \================================================================================================*/
+        correctConfigs() {
+            this.config.count = this.config.count || 1;
+            this.config.height = this.config.height || null;
+
+            for (let screen of this.screens) {
+                if (!this.config[screen]) {
+                    this.config[screen] = {
+                        cols: []
+                    };
+                }
+
+                if (this.config[screen][0]) {
+                    this.config[screen] = {
+                        cols: this.config[screen]
+                    }
+                }
+
+                let cols = [];
+                for (let i = 0; i < this.config.count; i++) {
+                    let confCols = this.config[screen].cols;
+
+                    if (confCols.length > i) {
+                        confCols[i].align = confCols[i].align || "1";
+                        confCols[i].width = confCols[i].width || 100 / this.config.count;
+                        confCols[i].offset = confCols[i].offset || 0;
+                        // confCols[i].borders = confCols[i].borders || JSON.parse(JSON.stringify(this.defaultBorders));
+                        // confCols[i].radius = confCols[i].radius || JSON.parse(JSON.stringify(this.defaultRadius));
+                        // confCols[i].shadow = confCols[i].shadow || JSON.parse(JSON.stringify(this.defaultShadow));
+
+                        cols.push(confCols[i]);
+                    }
+                    else {
+                        cols.push({
+                            align: "1",
+                            width: 100 / this.config.count,
+                            offset: 0,
+                            // borders: JSON.parse(JSON.stringify(this.defaultBorders)),
+                            // radius: JSON.parse(JSON.stringify(this.defaultRadius)),
+                            // shadow: JSON.parse(JSON.stringify(this.defaultShadow))
+                        })
+                    }
+                }
+
+                this.config[screen].cols = cols;
             }
-
-            return this.$el.querySelector('.preview').getBoundingClientRect().width * column.offset / 100;
         },
 
         copyConfig(type, index) {
@@ -573,6 +517,39 @@ export default {
             this.$forceUpdate();
         },
 
+        /*=============================================m_ÔÔ_m=============================================\
+          EDITION
+        \================================================================================================*/
+        applyColumnCount() {
+            try {
+                this.columnsCount = Math.min(Math.max(parseInt(this.columnsCount || 1) || 1, 1), 100);
+            } catch (error) {
+                this.columnsCount = 0;
+            }
+
+            this.config.count = this.columnsCount;
+
+            this.correctConfigs();
+        },
+
+        resizeColumns(offsets) {
+            let config = [];
+
+            let offset = offsets ? 2 : 0;
+
+            const offsetPerLine = offset * (Math.min(this.config.count, 10) + 1);
+
+            let width = Math.max(10 - offsetPerLine / 10, ((100 - offsetPerLine) / this.config.count));
+
+            for (let i = 0; i < this.config.count; i++) {
+                this.screenCols[i].width = width;
+                this.screenCols[i].offset = offset;
+                config.push(this.screenCols[i]);
+            }
+
+            this.config[this.screen].cols = config;
+        },
+
         setBorderStyle(column, index, width) {
             if (width != 0 && column.borders[index].style == 'none') {
                 column.borders[index].style = 'solid';
@@ -598,6 +575,7 @@ export default {
             index = Math.min(3, Math.max(0, index));
             return this.screens[index];
         },
+
         getIndexFromScreen(screen) {
             return Math.max(this.screens.indexOf(screen), 0);
         },
@@ -606,8 +584,22 @@ export default {
             return this.colors[index % this.colors.length];
         },
 
+        getOffsetWidth(column) {
+            if (!this.$el) {
+                return 0;
+            }
+
+            return this.$el.querySelector('.preview').getBoundingClientRect().width * column.offset / 100;
+        },
+
         beforeNext() {
-            this.options.result.wwRowConfig = this.config;
+
+            let config = JSON.parse(JSON.stringify(this.config));
+            config.sm.cols = config.sm.ignore ? null : config.sm.cols;
+            config.md.cols = config.md.ignore ? null : config.md.cols;
+            config.lg.cols = config.lg.ignore ? null : config.lg.cols;
+
+            this.options.result.wwRowConfig = config;
         }
     },
     created() {

@@ -1,22 +1,20 @@
 <template>
-    <div class="ww-row" v-bind:style="getRowHeight()">
+    <div class="ww-row" :style="getRowHeight()">
         <!-- wwManager:start -->
         <div class="ww-column-tab">
             <span class="wwi wwi-align-right"></span>
         </div>
-
-        <div class="ww-columns-preview">
-            <div class="ww-column-preview" v-for="(wwColumnPreview, index) in previewColumns" :key="index" :style="wwColumnPreview" :class="{'margin': wwColumnPreview.isMargin}"></div>
-        </div>
         <!-- wwManager:end -->
-        <div class="ww-column" v-for="(wwColumn, index) in wwObject.content.data.columns" :key="index" :column-index="index" :class="columnClasses[index]" :style="columnLayouts[index]">
-            <wwObject class="ww-column-bg" v-bind:ww-object="wwColumn.background" ww-category="background"></wwObject>
-
-            <div class="ww-column-style" :style="columnStyles[index]">
-                <wwLayoutColumn tag="div" ww-default="ww-image" :ww-list="wwColumn.wwObjects" class="ww-column-container ww-layout-column" @ww-add="wwAdd(wwColumn.wwObjects, $event)" @ww-remove="wwRemove(wwColumn.wwObjects, $event)">
-                    <wwObject v-for="wwObj in wwColumn.wwObjects" :key="wwObj.uniqueId" v-bind:ww-object="wwObj"></wwObject>
-                </wwLayoutColumn>
+        <div class="ww-column" v-for="(column, index) in screenCols" :key="index" :style="getWidthAndOffset(column)">
+            <!-- wwManager:start -->
+            <div class="ww-column-preview">
+                <div class="offset" :style="getOffsetStyle(column)"></div>
             </div>
+            <!-- wwManager:end -->
+            <wwObject class="ww-column-bg" :ww-object="getColData(index).background" ww-category="background"></wwObject>
+            <wwLayoutColumn tag="div" ww-default="ww-image" :ww-list="getColData(index).wwObjects" class="ww-column-container ww-layout-column" @ww-add="wwAdd(getColData(index).wwObjects, $event)" @ww-remove="wwRemove(getColData(index).wwObjects, $event)">
+                <wwObject v-for="wwObj in getColData(index).wwObjects" :key="wwObj.uniqueId" :ww-object="wwObj"></wwObject>
+            </wwLayoutColumn>
         </div>
     </div>
 </template>
@@ -26,6 +24,22 @@
 /* wwManager:start */
 import wwRowPopupLayout from './wwRowPopupLayout.vue';
 wwLib.wwPopups.addPopup('wwRowPopupLayout', wwRowPopupLayout);
+wwLib.wwPopups.addStory('WW_ROW_POPUP_LAYOUT', {
+    title: {
+        en_GB: 'Columns',
+        fr_FR: 'Colonnes'
+    },
+    type: 'wwRowPopupLayout',
+    buttons: {
+        FINISH: {
+            text: {
+                en_GB: 'Finish',
+                fr_FR: 'Terminer'
+            },
+            next: false
+        }
+    }
+});
 /* wwManager:end */
 
 
@@ -37,128 +51,145 @@ export default {
     },
     data() {
         return {
-            columnClasses: [],
-            columnLayouts: [],
-            columnStyles: [],
-            previewColumns: [],
-            screenSizes: ['xs', 'sm', 'md', 'lg']
+            screens: ['xs', 'sm', 'md', 'lg'],
+            screen: 'xs',
+
+            defaultBorders: [
+                {
+                    color: "#000000",
+                    style: "solid",
+                    width: 0
+                },
+                {
+                    color: "#000000",
+                    style: "solid",
+                    width: 0
+                },
+                {
+                    color: "#000000",
+                    style: "solid",
+                    width: 0
+                },
+                {
+                    color: "#000000",
+                    style: "solid",
+                    width: 0
+                }
+            ],
+
+            defaultRadius: [0, 0, 0, 0],
+
+            defaultShadow: {
+                x: 0,
+                y: 0,
+                blur: 0,
+                spread: 0,
+                color: '#000000'
+            },
+
+            aligns: ['center', 'flex-start', 'center', 'flex-end'],
         };
     },
     computed: {
         wwObject() {
             return this.wwObjectCtrl.get();
+        },
+        screenCols() {
+            let screen = this.screen;
+
+            while (!this.wwObject.content.data.config[screen] || this.wwObject.content.data.config[screen].ignore) {
+                screen = this.getScreenFromIndex(this.getIndexFromScreen(screen) - 1);
+            }
+
+            return this.wwObject.content.data.config[screen].cols;
         }
     },
     watch: {
-        wwColumns() {
-            this.updateColumns()
-        }
     },
     methods: {
         init: function () {
             window.addEventListener('resize', this.onResize);
-
-            this.updateColumns();
         },
 
-        correctColumns() {
-            let modifs = false;
-            for (let i = 0; i < this.wwObject.content.data.config.count; i++) {
-
-                if (this.wwObject.content.data.columns.length < i + 1) {
-                    this.wwObject.content.data.columns.push({});
-                }
-
-                if (!this.wwObject.content.data.columns[i].background) {
-                    this.wwObject.content.data.columns[i].background = wwLib.wwObject.getDefault({
-                        type: 'ww-color'
-                    });
-                    modifs = true;
-                }
-
-                if (!this.wwObject.content.data.columns[i].wwObjects) {
-                    this.wwObject.content.data.columns[i].wwObjects = [];
-                    modifs = true;
-                }
-            }
-            if (modifs) {
-                this.wwObjectCtrl.update(this.wwObject);
-            }
-        },
-
-        updateColumns() {
-
-            this.columnClasses = [];
-            this.columnLayouts = [];
-            this.columnStyles = [];
-            this.previewColumns = [];
-            this.correctColumns();
-
-            for (let i = 0; i < this.wwObject.content.data.config.count; i++) {
-
-                this.columnClasses.push(this.getAlignSelfForColumn(i))
-
-
-                let width = this.getWidth(i);
-                let offset = this.getOffset(i);
-                let order = this.getOrderForColumn(i);
-                let hide = this.getHideForColumn(i);
-
-                if (!hide) {
-                    if (offset != '0%') {
-                        this.previewColumns.push({
-                            isMargin: true,
-                            "width": offset,
-                            "flex-basis": offset,
-                            order: order
-                        });
-                    }
-                    this.previewColumns.push(Object.assign({}, width, { order: order }));
-                }
-
-
-
-                let columnLayouts = width;
-                columnLayouts.marginLeft = offset;
-                columnLayouts.order = order;
-                if (hide) {
-                    columnLayouts.display = 'none';
-                }
-
-                this.columnLayouts.push(columnLayouts);
-
-
-
-                let columnStyles = this.getBordersStyleForColumn(i);
-                Object.assign(columnStyles, this.getRadiusStyleForColumn(i));
-                Object.assign(columnStyles, this.getShadowStyleForColumn(i));
-
-                this.columnStyles.push(columnStyles);
-
-            }
-
-            let pcTotal = 0;
-            for (let pc of this.previewColumns) {
-                pcTotal += parseFloat(pc.width);
-            }
-            if (pcTotal < 99) {
-                this.previewColumns.push({
-                    isMargin: true,
-                    "width": (100 - pcTotal) + '%',
-                    "flex-basis": (100 - pcTotal) + '%',
-                })
-            }
-
-        },
         onResize() {
-            this.updateColumns()
+            this.setScreenSize();
         },
-        convertStyleObjectsToString(obj) {
-            let string = ''
-            for (const key in obj) {
-                string += key + ':' + obj[key] + ';'
+
+        setScreenSize() {
+            let newScreen = 'xs'
+
+            if (window.innerWidth < 768) {
+                newScreen = 'xs';
             }
-            return string
+            else if (window.innerWidth >= 768 && window.innerWidth < 992) {
+                newScreen = 'sm';
+            }
+            else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
+                newScreen = 'md';
+            }
+            else {
+                newScreen = 'lg';
+            }
+            if (this.screen != newScreen) {
+                this.screen = newScreen;
+            }
+        },
+
+        correctConfigs() {
+            let config = this.wwObject.content.data.config;
+            config.count = config.count || 1;
+            config.height = config.height || null;
+
+            for (let screen of this.screens) {
+                if (!config[screen]) {
+                    config[screen] = {
+                        ignore: true,
+                        cols: []
+                    };
+                }
+
+                if (config[screen][0]) {
+                    config[screen] = {
+                        cols: config[screen]
+                    }
+                }
+
+                if (!config[screen].ignore) {
+                    let cols = [];
+                    for (let i = 0; i < config.count; i++) {
+                        let confCols = config[screen].cols;
+
+                        if (confCols.length > i) {
+                            confCols[i].align = confCols[i].align || "1";
+                            confCols[i].width = confCols[i].width || 100 / config.count;
+                            confCols[i].offset = confCols[i].offset || 0;
+                            // confCols[i].borders = confCols[i].borders || JSON.parse(JSON.stringify(this.defaultBorders));
+                            // confCols[i].radius = confCols[i].radius || JSON.parse(JSON.stringify(this.defaultRadius));
+                            // confCols[i].shadow = confCols[i].shadow || JSON.parse(JSON.stringify(this.defaultShadow));
+
+                            cols.push(confCols[i]);
+                        }
+                        else {
+                            cols.push({
+                                align: "1",
+                                width: 100 / config.count,
+                                offset: 0,
+                                // borders: JSON.parse(JSON.stringify(this.defaultBorders)),
+                                // radius: JSON.parse(JSON.stringify(this.defaultRadius)),
+                                // shadow: JSON.parse(JSON.stringify(this.defaultShadow))
+                            })
+                        }
+                    }
+
+                    config[screen].cols = cols;
+                }
+            }
+
+            this.wwObjectCtrl.update(this.wwObject);
+        },
+
+        getColData(index) {
+            return this.wwObject.content.data.columns[index] || {};
         },
 
         wwAdd(list, options) {
@@ -172,333 +203,16 @@ export default {
         /*=============================================m_ÔÔ_m=============================================\
           STYLE FUNCTIONS
         \================================================================================================*/
-        getHideForColumn(columnIndex) {
-            const defaultHide = false;
-
-            let hideList = { xs: null, sm: null, md: null, lg: null };
-
-            for (let i = 0; i < this.screenSizes.length; i++) {
-                if (this.wwObject.content.data.config[this.screenSizes[i]]
-                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]) {
-                    if (this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].hide) {
-                        hideList[this.screenSizes[i]] = true;
-                    }
-                    else {
-                        hideList[this.screenSizes[i]] = false;
-                    }
-                }
+        getWidthAndOffset(column) {
+            let style = {
+                marginLeft: (column.offset || 0) + '%',
+                flexBasis: (column.width || 0) + '%',
+                alignItems: this.aligns[column.align || 0],
+                display: column.hide ? 'none' : 'flex'
             }
-
-            if (window.innerWidth < 768) {
-                if (hideList["xs"] === null) {
-                    return defaultHide;
-                }
-                return hideList["xs"];
-            }
-            else if (window.innerWidth >= 768 && window.innerWidth < 992) {
-                if (hideList["sm"] === null) {
-                    if (hideList["xs"] === null) {
-                        return defaultHide;
-                    }
-                    return hideList["xs"];
-                }
-                return hideList["sm"];
-            }
-            else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
-                if (hideList["md"] === null) {
-                    if (hideList["sm"] === null) {
-                        if (hideList["xs"] === null) {
-                            return defaultHide;
-                        }
-                        return hideList["xs"];
-                    }
-                    return hideList["sm"];
-                }
-                return hideList["md"];
-            }
-            else {
-                if (hideList["lg"] === null) {
-                    if (hideList["md"] === null) {
-                        if (hideList["sm"] === null) {
-                            if (hideList["xs"] === null) {
-                                return defaultHide;
-                            }
-                            return hideList["xs"];
-                        }
-                        return hideList["sm"];
-                    }
-                    return hideList["md"];
-                }
-                return hideList["lg"];
-            }
+            return style;
         },
-        getBordersStyleForColumn(columnIndex) {
-            let defaultBordersStyle = {
-                "border-top-width": "0px",
-                "border-top-color": "#000000",
-                "border-right-width": "0px",
-                "border-right-color": "#000000",
-                "border-bottom-width": "0px",
-                "border-bottom-color": "#000000",
-                "border-left-width": "0px",
-                "border-left-color": "#000000"
-            }
 
-            let bordersStyleList = { xs: null, sm: null, md: null, lg: null };
-
-            for (let i = 0; i < this.screenSizes.length; i++) {
-                if (this.wwObject.content.data.config[this.screenSizes[i]]
-                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]
-                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].borders
-                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].borders.length) {
-                    var borders = this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].borders;
-                    bordersStyleList[this.screenSizes[i]] = {
-                        "border-top-width": borders[0].width + "px",
-                        "border-top-color": borders[0].color,
-                        "border-top-style": borders[0].style || "solid",
-                        "border-right-width": borders[1].width + "px",
-                        "border-right-color": borders[1].color,
-                        "border-right-style": borders[1].style || "solid",
-                        "border-bottom-width": borders[2].width + "px",
-                        "border-bottom-color": borders[2].color,
-                        "border-bottom-style": borders[2].style || "solid",
-                        "border-left-width": borders[3].width + "px",
-                        "border-left-color": borders[3].color,
-                        "border-left-style": borders[3].style || "solid",
-                    }
-                }
-            }
-
-            if (window.innerWidth < 768) {
-                return bordersStyleList["xs"] || defaultBordersStyle;
-            }
-            else if (window.innerWidth >= 768 && window.innerWidth < 992) {
-                return bordersStyleList["sm"] || bordersStyleList["xs"] || defaultBordersStyle;
-            }
-            else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
-                return bordersStyleList["md"] || bordersStyleList["sm"] || bordersStyleList["xs"] || defaultBordersStyle;
-            }
-            else {
-                return bordersStyleList["lg"] || bordersStyleList["md"] || bordersStyleList["sm"] || bordersStyleList["xs"] || defaultBordersStyle;
-            }
-
-        },
-        getRadiusStyleForColumn(columnIndex) {
-
-            let defaultRadiusStyle = {
-                "border-top-left-radius": "0",
-                "border-top-right-radius": "0",
-                "border-bottom-right-radius": "0",
-                "border-bottom-left-radius": "0"
-            }
-
-            let radiusStyleList = { xs: null, sm: null, md: null, lg: null };
-
-            for (var i = 0; i < this.screenSizes.length; i++) {
-                if (this.wwObject.content.data.config[this.screenSizes[i]]
-                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex] && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].radius) {
-                    let radius = this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].radius;
-                    radiusStyleList[this.screenSizes[i]] = {
-                        "border-top-left-radius": radius[0] + "px",
-                        "border-top-right-radius": radius[1] + "px",
-                        "border-bottom-right-radius": radius[2] + "px",
-                        "border-bottom-left-radius": radius[3] + "px"
-                    }
-                }
-            }
-
-            if (window.innerWidth < 768) {
-                return radiusStyleList["xs"] || defaultRadiusStyle;
-            }
-            else if (window.innerWidth >= 768 && window.innerWidth < 992) {
-                return radiusStyleList["sm"] || radiusStyleList["xs"] || defaultRadiusStyle;
-            }
-            else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
-                return radiusStyleList["md"] || radiusStyleList["sm"] || radiusStyleList["xs"] || defaultRadiusStyle;
-            }
-            else {
-                return radiusStyleList["lg"] || radiusStyleList["md"] || radiusStyleList["sm"] || radiusStyleList["xs"] || defaultRadiusStyle;
-            }
-
-        },
-        getShadowStyleForColumn(columnIndex) {
-
-            let defaultShadowStyle = {
-                "-webkit-box-shadow": "none",
-                "-moz-box-shadow": "none",
-                "-o-shadow": "none",
-                "box-shadow": "none"
-            }
-
-            let shadowStyleList = { xs: null, sm: null, md: null, lg: null };
-
-            for (let i = 0; i < this.screenSizes.length; i++) {
-                if (this.wwObject.content.data.config[this.screenSizes[i]]
-                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex] && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].shadow) {
-                    let shadow = this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].shadow;
-
-                    let style = (shadow.x || "0") + "px " + (shadow.y || "0") + "px " + (shadow.blur || "0") + "px " + (shadow.spread || "0") + "px " + (shadow.color || "#FFFFFFC0");
-
-                    shadowStyleList[this.screenSizes[i]] = {
-                        "-webkit-box-shadow": style,
-                        "-moz-box-shadow": style,
-                        "-o-shadow": style,
-                        "box-shadow": style,
-                    }
-                }
-            }
-
-            if (window.innerWidth < 768) {
-                return shadowStyleList["xs"] || defaultShadowStyle;
-            }
-            else if (window.innerWidth >= 768 && window.innerWidth < 992) {
-                return shadowStyleList["sm"] || shadowStyleList["xs"] || defaultShadowStyle;
-            }
-            else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
-                return shadowStyleList["md"] || shadowStyleList["sm"] || shadowStyleList["xs"] || defaultShadowStyle;
-            }
-            else {
-                return shadowStyleList["lg"] || shadowStyleList["md"] || shadowStyleList["sm"] || shadowStyleList["xs"] || defaultShadowStyle;
-            }
-
-        },
-        getAlignSelfForColumn(columnIndex) {
-
-            //Align : 
-            //0 : default
-            //1 : top
-            //2 : center
-            //3 : bottom
-
-            let defaultAlign = "ww-column-align-top";
-
-            let alignList = { xs: null, sm: null, md: null, lg: null };
-
-            for (let i = 0; i < this.screenSizes.length; i++) {
-                if (this.wwObject.content.data.config[this.screenSizes[i]]
-                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]) {
-                    let align = this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].align
-                    switch (align + "") {
-                        case "1":
-                            alignList[this.screenSizes[i]] = "ww-column-align-top";
-                            break;
-                        case "2":
-                        case "0":
-                            alignList[this.screenSizes[i]] = "ww-column-align-center";
-                            break;
-                        case "3":
-                            alignList[this.screenSizes[i]] = "ww-column-align-bottom";
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-
-            if (window.innerWidth < 768) {
-                return alignList["xs"] || defaultAlign;
-            }
-            else if (window.innerWidth >= 768 && window.innerWidth < 992) {
-                return alignList["sm"] || alignList["xs"] || defaultAlign;
-            }
-            else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
-                return alignList["md"] || alignList["sm"] || alignList["xs"] || defaultAlign;
-            }
-            else {
-                return alignList["lg"] || alignList["md"] || alignList["sm"] || alignList["xs"] || defaultAlign;
-            }
-
-        },
-        getOrderForColumn(columnIndex) {
-
-            let defaultOrder = "0";
-
-            let orderList = { xs: null, sm: null, md: null, lg: null };
-
-            for (let i = 0; i < this.screenSizes.length; i++) {
-                if (this.wwObject.content.data.config[this.screenSizes[i]]
-                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]) {
-                    let order = this.wwObject.content.data.config[this.screenSizes[i]][columnIndex].order;
-                    orderList[this.screenSizes[i]] = order;
-                }
-            }
-
-            if (window.innerWidth < 768) {
-                return orderList["xs"] || defaultOrder;
-            }
-            else if (window.innerWidth >= 768 && window.innerWidth < 992) {
-                return orderList["sm"] || orderList["xs"] || defaultOrder;
-            }
-            else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
-                return orderList["md"] || orderList["sm"] || orderList["xs"] || defaultOrder;
-            }
-            else {
-                return orderList["lg"] || orderList["md"] || orderList["sm"] || orderList["xs"] || defaultOrder;
-            }
-
-        },
-        getWidth(columnIndex) {
-
-            let defaulWidth = {
-                "width": "100%",
-                "flex-basis": "100%"
-            }
-
-            let widthList = { xs: null, sm: null, md: null, lg: null };
-
-            for (let i = 0; i < this.screenSizes.length; i++) {
-                if (this.wwObject.content.data.config[this.screenSizes[i]]
-                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]) {
-                    let conf = this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]
-                    widthList[this.screenSizes[i]] = {
-                        "width": (conf.width) + "%",
-                        "flex-basis": (conf.width) + "%",
-                    }
-                }
-            }
-
-            if (window.innerWidth < 768) {
-                return widthList["xs"] || defaulWidth
-            }
-            else if (window.innerWidth >= 768 && window.innerWidth < 992) {
-                return widthList["sm"] || widthList["xs"] || defaulWidth
-            }
-            else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
-                return widthList["md"] || widthList["sm"] || widthList["xs"] || defaulWidth
-            }
-            else {
-                return widthList["lg"] || widthList["md"] || widthList["sm"] || widthList["xs"] || defaulWidth
-            }
-
-        },
-        getOffset(columnIndex) {
-
-            let defaulOffset = "0%"
-
-            let offsetList = { xs: null, sm: null, md: null, lg: null };
-
-            for (let i = 0; i < this.screenSizes.length; i++) {
-                if (this.wwObject.content.data.config[this.screenSizes[i]]
-                    && this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]) {
-                    let conf = this.wwObject.content.data.config[this.screenSizes[i]][columnIndex]
-                    offsetList[this.screenSizes[i]] = Math.max((conf.offset), 0) + "%"
-                }
-            }
-
-            if (window.innerWidth < 768) {
-                return offsetList["xs"] || defaulOffset
-            }
-            else if (window.innerWidth >= 768 && window.innerWidth < 992) {
-                return offsetList["sm"] || offsetList["xs"] || defaulOffset
-            }
-            else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
-                return offsetList["md"] || offsetList["sm"] || offsetList["xs"] || defaulOffset
-            }
-            else {
-                return offsetList["lg"] || offsetList["md"] || offsetList["sm"] || offsetList["xs"] || defaulOffset
-            }
-
-        },
         getRowHeight() {
 
             if (!this.wwObject) {
@@ -535,24 +249,29 @@ export default {
         },
 
         /* wwManager:start */
-        async editColumns() {
+        getOffsetStyle(column) {
+            let width = column.offset / column.width * 100;
+            return {
+                width: width + '%',
+                backgroundColor: width ? '#03a9f410' : 'transparent'
+            }
+        },
+        /* wwManager:end */
 
-            wwLib.wwPopups.addStory('WW_ROW_POPUP_LAYOUT', {
-                title: {
-                    en_GB: 'Columns',
-                    fr_FR: 'Colonnes'
-                },
-                type: 'wwRowPopupLayout',
-                buttons: {
-                    FINISH: {
-                        text: {
-                            en_GB: 'Finish',
-                            fr_FR: 'Terminer'
-                        },
-                        next: false
-                    }
-                }
-            });
+        /*=============================================m_ÔÔ_m=============================================\
+          UTILS
+        \================================================================================================*/
+        getScreenFromIndex(index) {
+            index = Math.min(3, Math.max(0, index));
+            return this.screens[index];
+        },
+
+        getIndexFromScreen(screen) {
+            return Math.max(this.screens.indexOf(screen), 0);
+        },
+
+        /* wwManager:start */
+        async editColumns() {
 
 
             const options = {
@@ -565,24 +284,132 @@ export default {
             try {
                 const result = await wwLib.wwPopups.open(options)
 
-                console.log(result);
+                if (result.wwRowConfig) {
+                    this.wwObject.content.data.config = result.wwRowConfig;
+                    this.wwObjectCtrl.update(this.wwObject);
+                }
             } catch (error) {
 
                 console.log('ERROR', result);
             }
 
+        },
+
+        async edit() {
+            wwLib.wwObjectHover.setLock(this);
+
+            let editList = {
+                LAYOUT: {
+                    separator: {
+                        en_GB: 'Configuration',
+                        fr_FR: 'Configuration'
+                    },
+                    title: {
+                        en_GB: 'Layout',
+                        fr_FR: 'Disposition'
+                    },
+                    desc: {
+                        en_GB: 'Set columns count, sizes, ...',
+                        fr_FR: 'Changer le nombre de colonnes, leurs tailles, ...'
+                    },
+                    icon: 'wwi wwi-config',
+                    shortcut: 'c',
+                    next: 'WW_ROW_POPUP_LAYOUT'
+                },
+                EDIT_ANIM: {
+                    separator: {
+                        en_GB: 'Interaction',
+                        fr_FR: 'Interaction'
+                    },
+                    title: {
+                        en_GB: 'Animation',
+                        fr_FR: 'Animation'
+                    },
+                    desc: {
+                        en_GB: 'Change animation',
+                        fr_FR: 'Choisir l\'animation à l\'apparition de l\'image'
+                    },
+                    icon: 'wwi wwi-anim',
+                    shortcut: 'a',
+                    next: 'ANIMATION'
+                },
+                EDIT_HIDE: {
+                    separator: {
+                        en_GB: 'More',
+                        fr_FR: 'Plus'
+                    },
+                    title: {
+                        en_GB: 'Show / Hide',
+                        fr_FR: 'Montrer / Cacher'
+                    },
+                    icon: 'wwi wwi-hidden',
+                    shortcut: 'h',
+                    next: null,
+                    result: {
+                        hidden: true
+                    }
+                },
+                EDIT_CHANGE: {
+                    title: {
+                        en_GB: 'Change object type',
+                        fr_FR: 'Changer le type d\'objet'
+                    },
+                    icon: 'wwi wwi-switch',
+                    shortcut: 't',
+                    next: 'SELECT_WWOBJECT'
+                },
+            }
+
+            wwLib.wwPopups.addStory('WWROW_EDIT', {
+                title: {
+                    en_GB: 'Edit Row',
+                    fr_FR: 'Editer les colonnes'
+                },
+                type: 'wwPopupList',
+                buttons: null,
+                storyData: {
+                    list: editList
+                }
+            })
+
+            let options = {
+                firstPage: 'WWROW_EDIT',
+                data: {
+                    wwObject: this.wwObject
+                }
+            }
+
+            try {
+                const result = await wwLib.wwPopups.open(options);
+
+                /*=============================================m_ÔÔ_m=============================================\
+                  STYLE
+                \================================================================================================*/
+                if (typeof (result.wwRowConfig) != 'undefined') {
+                    this.wwObject.content.data.config = result.wwRowConfig;
+                }
+
+                this.wwObjectCtrl.update(this.wwObject);
+
+                this.wwObjectCtrl.globalEdit(result);
+
+                console.log(this.wwObject)
+
+            } catch (error) {
+                console.log(error);
+            }
+
+            wwLib.wwObjectHover.removeLock();
         }
         /* wwManager:end */
     },
     created() {
-        this.correctColumns();
+        this.correctConfigs();
+        this.setScreenSize();
     },
     mounted() {
         this.init();
         this.$emit('ww-loaded', this);
-
-
-
     },
     beforeDestroyed() {
         window.removeEventListener('resize', this.onResize);
@@ -590,33 +417,14 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .ww-row {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-flex-wrap: wrap;
-    -ms-flex-wrap: wrap;
     flex-wrap: wrap;
     position: relative;
 }
 
-.ww-row .ww-column.ww-column-align-center .ww-column-container {
-    align-self: center;
-}
-
-.ww-row .ww-column.ww-column-align-top .ww-column-container {
-    align-self: flex-start;
-}
-
-.ww-row .ww-column.ww-column-align-bottom .ww-column-container {
-    align-self: flex-end;
-}
-
 .ww-column {
-    /*height: 100%;*/
-    /*overflow: hidden;*/
     position: relative;
     display: flex;
     pointer-events: none;
@@ -665,6 +473,29 @@ export default {
     display: flex;
 }
 
+.ww-column-preview {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 50;
+    pointer-events: none;
+    border-right: 1px solid #03a9f457;
+
+    .offset {
+        position: absolute;
+        right: 100%;
+        height: 100%;
+        top: 0;
+        border-right: 1px solid #03a9f457;
+    }
+}
+.ww-editing .ww-column-preview {
+    display: block;
+}
+/* 
 .ww-columns-preview {
     display: none;
     position: absolute;
@@ -674,6 +505,7 @@ export default {
     width: 100%;
     z-index: 50;
     pointer-events: none;
+    flex-wrap: wrap;
 }
 
 .ww-column-preview + .ww-column-preview {
@@ -681,17 +513,10 @@ export default {
 }
 .ww-column-preview.margin {
     background-color: #03a9f410;
-    /*background: repeating-linear-gradient(
-        45deg,
-        #ffffff00,
-        #ffffff00 30px,
-        #03a9f440 30px,
-        #03a9f440 31px
-    );*/
 }
 .ww-editing .ww-columns-preview {
     display: flex;
-}
+} */
 /* wwManager:end */
 </style>
 
