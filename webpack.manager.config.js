@@ -3,12 +3,8 @@ const path = require('path')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const autoprefixer = require('autoprefixer');
 
-
-module.exports = [
-    /*=============================================m_ÔÔ_m=============================================\
-      MANAGER - NORMAL CONFIG
-    \================================================================================================*/
-    {
+module.exports = function () {
+    const config = {
         name: 'manager',
         entry: './src/index.js',
         mode: 'development',
@@ -71,13 +67,40 @@ module.exports = [
         },
         output: {
             path: path.join(__dirname, "dist"),
-            filename: "manager.js",
-            publicPath: "http://localhost:8081/"
+            filename: "manager.js"
         },
         plugins: [
             // make sure to include the plugin for the magic
             new VueLoaderPlugin()
         ]
-    },
+    }
 
-]
+    function findPara(param) {
+        let result = '';
+        process.argv.forEach((argv) => {
+            if (argv.indexOf('--' + param) === -1) return;
+            result = argv.split('=')[1];
+        });
+        return result;
+    }
+
+    let port = findPara('port');
+
+    try {
+        port = parseInt(port);
+    }
+    catch (e) {
+        port = null;
+    }
+
+    if (port) {
+        config.devServer.port = port;
+        config.output.publicPath = 'https://localhost:' + port + '/';
+    }
+    else {
+        console.log('\x1b[41mPLEASE DEFINE A PORT (ex : --port=8080)\x1b[0m');
+        return null;
+    }
+
+    return config;
+}
