@@ -185,11 +185,30 @@ export default {
                 }
             }
 
+            let colData = [];
+            this.wwObject.content.data.columns = this.wwObject.content.data.columns || [];
+            for (let i = 0; i < config.count; i++) {
+                if (this.wwObject.content.data.columns[i]) {
+                    colData[i] = this.wwObject.content.data.columns[i];
+                    if (!colData[i].background) {
+                        colData[i].background = wwLib.wwObject.getDefault({ type: 'ww-color' });
+                    }
+                }
+                else {
+                    colData[i] = {
+                        wwObjects: [],
+                        background: wwLib.wwObject.getDefault({ type: 'ww-color' })
+                    }
+                }
+            }
+            console.log(colData);
+            this.wwObject.content.data.columns = colData;
+
             this.wwObjectCtrl.update(this.wwObject);
         },
 
         getColData(index) {
-            return this.wwObject.content.data.columns[index] || {};
+            return this.wwObject.content.data.columns[index];
         },
 
         wwAdd(list, options) {
