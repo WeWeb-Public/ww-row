@@ -321,7 +321,7 @@ export default {
         screenCols() {
             let screen = this.screen;
 
-            while (this.config[screen].ignore) {
+            while (this.config[screen].ignore && this.getIndexFromScreen(screen) > 0) {
                 screen = this.getScreenFromIndex(this.getIndexFromScreen(screen) - 1);
             }
 
@@ -334,6 +334,7 @@ export default {
     },
     methods: {
         init: function () {
+            console.log('oeihfisgefiu')
             this.config = this.options.data.wwObject && this.options.data.wwObject.content && this.options.data.wwObject.content.data
                 && this.options.data.wwObject.content.data.config ? this.options.data.wwObject.content.data.config : this.config;
 
