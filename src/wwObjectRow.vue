@@ -1,5 +1,5 @@
 <template>
-    <div class="ww-row" :style="rowHeight">
+    <div class="ww-row">
         <!-- wwManager:start -->
         <div class="ww-column-tab">
             <span class="wwi wwi-align-right"></span>
@@ -110,12 +110,9 @@ export default {
                 screen = this.getScreenFromIndex(this.getIndexFromScreen(screen) - 1);
             }
 
-            let height = 'auto';
+            let height = '60px';
 
-            let defaultHeight = {
-                height: 'auto',
-                minHeight: '60px'
-            }
+            let defaultHeight = '60px'
 
             if (this.wwAttrs && this.wwAttrs.wwRowDefaultHeight) {
                 height = this.wwAttrs.wwRowDefaultHeight;
@@ -136,14 +133,10 @@ export default {
             }
 
             if (window.CSS && window.CSS.supports && window.CSS.supports('--fake-var', 0)) {
-                return {
-                    minHeight: 'calc(var(--vh, 1vh) * ' + height + ')'
-                }
+                return 'calc(var(--vh, 1vh) * ' + height + ')'
             }
             else {
-                return {
-                    minHeight: height + 'vh'
-                }
+                return height + 'vh'
             }
         }
     },
@@ -269,7 +262,8 @@ export default {
                 marginLeft: (column.offset || 0) + '%',
                 flexBasis: (column.width || 0) + '%',
                 alignItems: this.aligns[column.align || 0],
-                display: column.hide ? 'none' : 'flex'
+                display: column.hide ? 'none' : 'flex',
+                minHeight: this.rowHeight
             }
             return style;
         },
