@@ -51,6 +51,10 @@
         "en_GB": "Distribute with spaces",
         "fr_FR": "Répartir avec espaces"
     },
+    "height": {
+        "en_GB": "Height",
+        "fr_FR": "Hauteur"
+    },
     "column": {
         "en_GB": "Column",
         "fr_FR": "Colonne"

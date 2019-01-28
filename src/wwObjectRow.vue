@@ -1,5 +1,5 @@
 <template>
-    <div class="ww-row" :style="getRowHeight()">
+    <div class="ww-row" :style="rowHeight">
         <!-- wwManager:start -->
         <div class="ww-column-tab">
             <span class="wwi wwi-align-right"></span>
@@ -102,6 +102,52 @@ export default {
             }
 
             return this.wwObject.content.data.config[screen].cols;
+        },
+        rowHeight() {
+            let screen = this.screen;
+
+            while (!this.wwObject.content.data.config[screen] || this.wwObject.content.data.config[screen].ignore) {
+                screen = this.getScreenFromIndex(this.getIndexFromScreen(screen) - 1);
+            }
+
+            let height = 'auto';
+
+            let defaultHeight = {
+                height: 'auto',
+                minHeight: '60px'
+            }
+
+            if (this.wwAttrs && this.wwAttrs.wwRowDefaultHeight) {
+                height = this.wwAttrs.wwRowDefaultHeight;
+            }
+
+            let wwObjectHeight;
+
+            try {
+                wwObjectHeight = parseFloat(this.wwObject.content.data.config[screen].height);
+            } catch (error) {
+                wwObjectHeight = 0;
+            }
+
+            height = wwObjectHeight || height;
+
+            if (height == 'auto' || height == 0 || height == '0') {
+                console.log('1', height);
+                return defaultHeight;
+            }
+
+            if (window.CSS && window.CSS.supports && window.CSS.supports('--fake-var', 0)) {
+                console.log('2', height);
+                return {
+                    minHeight: 'calc(var(--vh, 1vh) * ' + height + ')'
+                }
+            }
+            else {
+                console.log('3', height);
+                return {
+                    minHeight: height + 'vh'
+                }
+            }
         }
     },
     watch: {
@@ -232,41 +278,6 @@ export default {
             return style;
         },
 
-        getRowHeight() {
-
-            if (!this.wwObject) {
-                return;
-            }
-
-            this.wwObject.content.data.config.height = this.wwObject.content.data.config.height || {};
-
-            if (this.wwObject.content.data.config.height.value && this.wwObject.content.data.config.height.unit) {
-                return {
-                    'height': this.wwObject.content.data.config.height.value + this.wwObject.content.data.config.height.unit
-                }
-            }
-
-            if (this.wwAttrs && this.wwAttrs.wwRowDefaultHeight) {
-                let height = this.wwAttrs.wwRowDefaultHeight;
-                if (window.CSS && window.CSS.supports && window.CSS.supports('--fake-var', 0)) {
-                    return {
-                        'height': 'calc(var(--vh, 1vh) * ' + height + ')'
-                    }
-                }
-                else {
-                    return {
-                        'height': height + 'vh'
-                    }
-                }
-
-            }
-
-            return {
-                'height': 'auto',
-                'min-height': '60px'
-            };
-        },
-
         /* wwManager:start */
         getOffsetStyle(column) {
             let width = column.offset / column.width * 100;
@@ -302,6 +313,8 @@ export default {
 
             try {
                 const result = await wwLib.wwPopups.open(options)
+
+                console.log(result);
 
                 if (result.wwRowConfig) {
                     this.wwObject.content.data.config = result.wwRowConfig;

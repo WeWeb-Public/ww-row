@@ -56,6 +56,9 @@
                     <wwManagerButton class="button" color="blue" @click="resizeColumns(false)">{{wwLang.getText('distribute')}}</wwManagerButton>
                     <wwManagerButton class="button" color="blue" @click="resizeColumns(true)">{{wwLang.getText('distributeWithSpaces')}}</wwManagerButton>
                 </div>
+                <div class="columns-count-container">
+                    <wwManagerInput color="green" :label="wwLang.getText('height') +' - %'" v-model="config[screen].height"></wwManagerInput>
+                </div>
                 <div class="columns">
                     <div class="column" v-for="(column, index) in screenCols" :key="index" :class="getColor(index)">
                         <div class="copy-paste-container">
@@ -334,7 +337,6 @@ export default {
     },
     methods: {
         init: function () {
-            console.log('oeihfisgefiu')
             this.config = this.options.data.wwObject && this.options.data.wwObject.content && this.options.data.wwObject.content.data
                 && this.options.data.wwObject.content.data.config ? this.options.data.wwObject.content.data.config : this.config;
 
@@ -443,9 +445,11 @@ export default {
                     }
                 }
 
+                this.config[screen].height = Math.max(this.config[screen].height || 0, 0);
+
                 let cols = [];
                 for (let i = 0; i < this.config.count; i++) {
-                    let confCols = this.config[screen].cols;
+                    let confCols = this.config[screen].cols || [];
 
                     if (confCols.length > i) {
                         confCols[i].align = confCols[i].align || "1";
@@ -471,6 +475,7 @@ export default {
 
                 this.config[screen].cols = cols;
             }
+            console.log(this.config)
         },
 
         copyConfig(type, index) {

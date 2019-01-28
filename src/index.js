@@ -11,21 +11,25 @@ const addComponent = function () {
                 data: {
                     config: {
                         count: 3,
-                        xs: null,
-                        sm: [{
-                            offset: 0,
-                            width: 33.33,
-                            borders: []
-                        }, {
-                            offset: 0,
-                            width: 33.33,
-                            borders: []
-                        }, {
-                            offset: 0,
-                            width: 33.33,
-                            borders: []
-                        }
-                        ],
+                        xs: {
+                            height: null,
+                            ignore: false,
+                            cols: [{
+                                offset: 0,
+                                width: 33.33,
+                                borders: []
+                            }, {
+                                offset: 0,
+                                width: 33.33,
+                                borders: []
+                            }, {
+                                offset: 0,
+                                width: 33.33,
+                                borders: []
+                            }
+                            ]
+                        },
+                        sm: null,
                         md: null,
                         lg: null
                     },
