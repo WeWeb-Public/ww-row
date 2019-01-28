@@ -132,18 +132,15 @@ export default {
             height = wwObjectHeight || height;
 
             if (height == 'auto' || height == 0 || height == '0') {
-                console.log('1', height);
                 return defaultHeight;
             }
 
             if (window.CSS && window.CSS.supports && window.CSS.supports('--fake-var', 0)) {
-                console.log('2', height);
                 return {
                     minHeight: 'calc(var(--vh, 1vh) * ' + height + ')'
                 }
             }
             else {
-                console.log('3', height);
                 return {
                     minHeight: height + 'vh'
                 }
@@ -247,7 +244,6 @@ export default {
                     }
                 }
             }
-            console.log(colData);
             this.wwObject.content.data.columns = colData;
 
             this.wwObjectCtrl.update(this.wwObject);
@@ -313,8 +309,6 @@ export default {
 
             try {
                 const result = await wwLib.wwPopups.open(options)
-
-                console.log(result);
 
                 if (result.wwRowConfig) {
                     this.wwObject.content.data.config = result.wwRowConfig;
@@ -424,8 +418,6 @@ export default {
                 this.wwObjectCtrl.update(this.wwObject);
 
                 this.wwObjectCtrl.globalEdit(result);
-
-                console.log(this.wwObject)
 
             } catch (error) {
                 console.log(error);
