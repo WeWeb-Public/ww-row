@@ -52,7 +52,6 @@ export default {
     data() {
         return {
             screens: ['xs', 'sm', 'md', 'lg'],
-            screen: 'xs',
 
             defaultBorders: [
                 {
@@ -91,25 +90,16 @@ export default {
         };
     },
     computed: {
+        screen() {
+            return wwLib.$store.getters['websiteData/getScreenSize'];
+        },
         wwObject() {
             return this.wwObjectCtrl.get();
         },
         screenCols() {
-            let screen = this.screen;
-
-            while (!this.wwObject.content.data.config[screen] || this.wwObject.content.data.config[screen].ignore) {
-                screen = this.getScreenFromIndex(this.getIndexFromScreen(screen) - 1);
-            }
-
-            return this.wwObject.content.data.config[screen].cols;
+            return this.wwObject.content.data.config[this.getScreenSize()].cols;
         },
         rowHeight() {
-            let screen = this.screen;
-
-            while (!this.wwObject.content.data.config[screen] || this.wwObject.content.data.config[screen].ignore) {
-                screen = this.getScreenFromIndex(this.getIndexFromScreen(screen) - 1);
-            }
-
             let height = '60px';
 
             let defaultHeight = '60px'
@@ -121,7 +111,7 @@ export default {
             let wwObjectHeight;
 
             try {
-                wwObjectHeight = parseFloat(this.wwObject.content.data.config[screen].height);
+                wwObjectHeight = parseFloat(this.wwObject.content.data.config[this.getScreenSize()].height);
             } catch (error) {
                 wwObjectHeight = 0;
             }
@@ -143,32 +133,29 @@ export default {
     watch: {
     },
     methods: {
-        init: function () {
-            window.addEventListener('resize', this.onResize);
+        init() {
+        },
+
+        getScreenSize() {
+            let screen = this.screen || 'lg';
+
+            if (screen == 'lg' && (!this.wwObject.content.data.config['lg'] || this.wwObject.content.data.config['lg'].ignore)) {
+                screen = 'md';
+            }
+
+            if (screen == 'md' && (!this.wwObject.content.data.config['md'] || this.wwObject.content.data.config['md'].ignore)) {
+                screen = 'sm';
+            }
+
+            if (screen == 'sm' && (!this.wwObject.content.data.config['sm'] || this.wwObject.content.data.config['sm'].ignore)) {
+                screen = 'xs';
+            }
+
+            return screen;
         },
 
         onResize() {
             this.setScreenSize();
-        },
-
-        setScreenSize() {
-            let newScreen = 'xs'
-
-            if (window.innerWidth < 768) {
-                newScreen = 'xs';
-            }
-            else if (window.innerWidth >= 768 && window.innerWidth < 992) {
-                newScreen = 'sm';
-            }
-            else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
-                newScreen = 'md';
-            }
-            else {
-                newScreen = 'lg';
-            }
-            if (this.screen != newScreen) {
-                this.screen = newScreen;
-            }
         },
 
         correctConfigs() {
@@ -381,7 +368,6 @@ export default {
     },
     created() {
         this.correctConfigs();
-        this.setScreenSize();
     },
     mounted() {
         this.init();
