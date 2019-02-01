@@ -91,7 +91,7 @@ export default {
     },
     computed: {
         screen() {
-            return wwLib.$store.getters['websiteData/getScreenSize'];
+            return wwLib.$store.getters['front/getScreenSize'];
         },
         wwObject() {
             return this.wwObjectCtrl.get();
