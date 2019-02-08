@@ -9,44 +9,9 @@ const addComponent = function () {
             content: {
                 type: name,
                 data: {
-                    config: {
-                        count: 3,
-                        xs: {
-                            height: null,
-                            ignore: false,
-                            cols: [{
-                                offset: 0,
-                                width: 33.33,
-                                borders: []
-                            }, {
-                                offset: 0,
-                                width: 33.33,
-                                borders: []
-                            }, {
-                                offset: 0,
-                                width: 33.33,
-                                borders: []
-                            }
-                            ]
-                        },
-                        sm: null,
-                        md: null,
-                        lg: null
-                    },
-                    columns: [
-                        {
-                            background: null,
-                            wwObjects: []
-                        },
-                        {
-                            background: null,
-                            wwObjects: []
-                        },
-                        {
-                            background: null,
-                            wwObjects: []
-                        }
-                    ]
+                    wwObjects: [],
+                    align: 'center',
+                    justify: 'center'
                 }
             },
             upsales: {
@@ -58,7 +23,7 @@ const addComponent = function () {
             cmsOptions: {
                 wwObjectHover: {
                     pluses: false,
-                    hoverClass: 'ww-row-hover',
+                    hoverClass: 'ww-columns-hover',
                 },
                 wwObjectMenu: {
                     items: [
@@ -81,16 +46,6 @@ const addComponent = function () {
                             },
                             icon: 'wwi wwi-add',
                             action: 'wwLayout:addAfter'
-                        },
-
-                        {
-                            name: 'LAYOUT',
-                            text: {
-                                en_GB: 'Columns',
-                                fr_FR: 'Colonnes'
-                            },
-                            icon: 'wwi wwi-edit-margin',
-                            action: 'editColumns'
                         },
 
                         {
