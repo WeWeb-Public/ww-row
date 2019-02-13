@@ -30,7 +30,7 @@ wwLib.wwPopups.addStory('WW_ROW_STYLE_POPUP', {
 /* wwManager:end */
 
 export default {
-    name: "ww-columns",
+    name: "__COMPONENT_NAME__",
     props: {
         wwObjectCtrl: Object,
         wwAttrs: Object
