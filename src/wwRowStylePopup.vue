@@ -37,23 +37,23 @@ export default {
                     {
                         value: 'flex-start',
                         text: {
-                            en_GB: 'Start',
-                            fr_FR: 'Début'
+                            en: 'Start',
+                            fr: 'Début'
                         }
                     },
                     {
                         value: 'center',
                         default: true,
                         text: {
-                            en_GB: 'Center',
-                            fr_FR: 'Centrer'
+                            en: 'Center',
+                            fr: 'Centrer'
                         }
                     },
                     {
                         value: 'flex-end',
                         text: {
-                            en_GB: 'End',
-                            fr_FR: 'Fin'
+                            en: 'End',
+                            fr: 'Fin'
                         }
                     }
                 ]
@@ -65,44 +65,44 @@ export default {
                     {
                         value: 'flex-start',
                         text: {
-                            en_GB: 'Start',
-                            fr_FR: 'Début'
+                            en: 'Start',
+                            fr: 'Début'
                         }
                     },
                     {
                         value: 'center',
                         default: true,
                         text: {
-                            en_GB: 'Center',
-                            fr_FR: 'Centrer'
+                            en: 'Center',
+                            fr: 'Centrer'
                         }
                     },
                     {
                         value: 'flex-end',
                         text: {
-                            en_GB: 'End',
-                            fr_FR: 'Fin'
+                            en: 'End',
+                            fr: 'Fin'
                         }
                     },
                     {
                         value: 'space-between',
                         text: {
-                            en_GB: 'Space between',
-                            fr_FR: 'Espaces entre'
+                            en: 'Space between',
+                            fr: 'Espaces entre'
                         }
                     },
                     {
                         value: 'space-around',
                         text: {
-                            en_GB: 'Space around',
-                            fr_FR: 'Espaces autour'
+                            en: 'Space around',
+                            fr: 'Espaces autour'
                         }
                     },
                     {
                         value: 'space-evenly',
                         text: {
-                            en_GB: 'Space evenly',
-                            fr_FR: 'Espaces égaux'
+                            en: 'Space evenly',
+                            fr: 'Espaces égaux'
                         }
                     }
                 ]

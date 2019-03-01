@@ -1,5 +1,8 @@
 <template>
     <div class="ww-row">
+        <!-- wwManager:start -->
+        <div class="borders"></div>
+        <!-- wwManager:end -->
         <wwLayoutRow tag="div" :align="wwObject.content.data.align" :justify="wwObject.content.data.justify" ww-default="ww-button" :ww-list="wwObject.content.data.wwObjects" @ww-add="wwAdd($event)" @ww-remove="wwRemove($event)">
             <wwObject v-for="wwObj in wwObject.content.data.wwObjects" :key="wwObj.uniqueId" :ww-object="wwObj"></wwObject>
         </wwLayoutRow>
@@ -13,15 +16,15 @@ import wwRowStylePopup from './wwRowStylePopup.vue';
 wwLib.wwPopups.addPopup('wwRowStylePopup', wwRowStylePopup);
 wwLib.wwPopups.addStory('WW_ROW_STYLE_POPUP', {
     title: {
-        en_GB: 'Row',
-        fr_FR: 'Ligne'
+        en: 'Row',
+        fr: 'Ligne'
     },
     type: 'wwRowStylePopup',
     buttons: {
         FINISH: {
             text: {
-                en_GB: 'Finish',
-                fr_FR: 'Terminer'
+                en: 'Finish',
+                fr: 'Terminer'
             },
             next: false
         }
@@ -67,16 +70,16 @@ export default {
             let editList = {
                 STYLE: {
                     separator: {
-                        en_GB: 'Configuration',
-                        fr_FR: 'Configuration'
+                        en: 'Configuration',
+                        fr: 'Configuration'
                     },
                     title: {
-                        en_GB: 'Style',
-                        fr_FR: 'Style'
+                        en: 'Style',
+                        fr: 'Style'
                     },
                     desc: {
-                        en_GB: 'Set items alignment',
-                        fr_FR: 'Chanter l\'alignement des objets'
+                        en: 'Set items alignment',
+                        fr: 'Chanter l\'alignement des objets'
                     },
                     icon: 'wwi wwi-config',
                     shortcut: 'c',
@@ -86,8 +89,8 @@ export default {
 
             wwLib.wwPopups.addStory('WWCOLUMNS_EDIT', {
                 title: {
-                    en_GB: 'Edit Columns',
-                    fr_FR: 'Editer les colonnes'
+                    en: 'Edit Columns',
+                    fr: 'Editer les colonnes'
                 },
                 type: 'wwPopupEditWwObject',
                 buttons: null,
@@ -138,27 +141,26 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-.ww-columns {
-}
-</style>
 
 <style  lang="scss">
-/* wwManager:start */
-.ww-columns-hover {
-    background-color: #2ec6ba30;
-    background: repeating-linear-gradient(
-        -45deg,
-        #2ec6ba30,
-        #2ec6ba30 10px,
-        #2ec6ba50 10px,
-        #2ec6ba50 11px
-    );
-    border-width: 5px !important;
+.ww-row {
+    position: relative;
 }
+
+/* wwManager:start */
+.borders {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 1px solid #03a9f457;
+}
+
 .ww-editing {
-    .ww-layout-row {
-        border: 1px solid #03a9f457;
+    .borders {
+        display: block;
     }
 }
 /* wwManager:end */
