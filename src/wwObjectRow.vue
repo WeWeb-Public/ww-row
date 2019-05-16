@@ -158,7 +158,7 @@ export default {
     border: 1px solid #03a9f457;
 }
 
-.ww-editing-content {
+.ww-edit-mode-content {
     .borders {
         display: block;
     }
