@@ -7,10 +7,12 @@
                 </div>
             </div>
             <div class="options">
-                <div class="title">Align</div>
+                <div class="title">Vertical Align</div>
                 <wwManagerSelect class="option" :options="alignOptions" :value="props.align" @change="setProp('align', $event)"></wwManagerSelect>
-                <div class="title">Justify</div>
+                <div class="title">Horizontal Align</div>
                 <wwManagerSelect class="option" :options="justifyOptions" :value="props.justify" @change="setProp('justify', $event)"></wwManagerSelect>
+                <div class="title">Wrap</div>
+                <wwManagerSelect class="option" :options="wrapOptions" :value="props.wrap" @change="setProp('wrap', $event)"></wwManagerSelect>
             </div>
         </div>
     </div>
@@ -37,8 +39,8 @@ export default {
                     {
                         value: 'flex-start',
                         text: {
-                            en: 'Start',
-                            fr: 'Début'
+                            en: 'Top',
+                            fr: 'Haut'
                         }
                     },
                     {
@@ -52,8 +54,8 @@ export default {
                     {
                         value: 'flex-end',
                         text: {
-                            en: 'End',
-                            fr: 'Fin'
+                            en: 'Bottom',
+                            fr: 'Bas'
                         }
                     }
                 ]
@@ -108,12 +110,36 @@ export default {
                 ]
             },
 
+            wrapOptions: {
+                type: 'text',
+                values: [
+                    {
+                        value: 'nowrap',
+                        default: true,
+                        text: {
+                            en: 'No wrap',
+                            fr: 'Pas de retour à la ligne'
+                        }
+                    },
+                    {
+                        value: 'wrap',
+                        text: {
+                            en: 'Wrap',
+                            fr: 'Retour à la ligne'
+                        }
+                    }
+                ]
+            },
+
+
+
             /*=============================================m_ÔÔ_m=============================================\
               PROPS
             \================================================================================================*/
             props: {
                 align: 'center',
-                justify: 'center'
+                justify: 'center',
+                wrap: 'nowrap'
             }
         };
     },
@@ -123,7 +149,11 @@ export default {
     },
     methods: {
         init() {
+            this.props.align = this.options.data.wwObject.content.data.align;
+            this.props.justify = this.options.data.wwObject.content.data.justify;
+            this.props.wrap = this.options.data.wwObject.content.data.wrap;
 
+            this.setResult();
         },
         setResult() {
             for (const key in this.props) {
@@ -186,6 +216,8 @@ $ww-font: "Monserrat", sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
+            background: #e4e4e4;
+            padding: 10px;
 
             @media (min-width: 992px) {
                 flex-basis: 50%;
@@ -193,6 +225,7 @@ $ww-font: "Monserrat", sans-serif;
 
             .image {
                 width: 100%;
+                border: 1px solid #c1c1c1;
             }
         }
 

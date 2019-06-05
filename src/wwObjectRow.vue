@@ -3,7 +3,7 @@
         <!-- wwManager:start -->
         <div class="borders"></div>
         <!-- wwManager:end -->
-        <wwLayoutRow tag="div" :align="wwObject.content.data.align" :justify="wwObject.content.data.justify" ww-default="ww-button" :ww-list="wwObject.content.data.wwObjects" @ww-add="wwAdd($event)" @ww-remove="wwRemove($event)">
+        <wwLayoutRow tag="div" :align="wwObject.content.data.align" :wrap="wwObject.content.data.wrap" :justify="wwObject.content.data.justify" ww-default="ww-button" :ww-list="wwObject.content.data.wwObjects" @ww-add="wwAdd($event)" @ww-remove="wwRemove($event)">
             <wwObject v-for="wwObj in wwObject.content.data.wwObjects" :key="wwObj.uniqueId" :ww-object="wwObj"></wwObject>
         </wwLayoutRow>
     </div>
@@ -117,6 +117,9 @@ export default {
                 }
                 if (typeof (result.justify) != 'undefined') {
                     this.wwObject.content.data.justify = result.justify;
+                }
+                if (typeof (result.wrap) != 'undefined') {
+                    this.wwObject.content.data.wrap = result.wrap;
                 }
 
                 this.wwObjectCtrl.update(this.wwObject);
