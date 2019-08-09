@@ -149,9 +149,9 @@ export default {
     },
     methods: {
         init() {
-            this.props.align = this.options.data.wwObject.content.data.align;
-            this.props.justify = this.options.data.wwObject.content.data.justify;
-            this.props.wrap = this.options.data.wwObject.content.data.wrap;
+            this.props.align = this.options.data.wwObject.data.align;
+            this.props.justify = this.options.data.wwObject.data.justify;
+            this.props.wrap = this.options.data.wwObject.data.wrap;
 
             this.setResult();
         },
@@ -173,7 +173,7 @@ export default {
         },
         setProp(key, value) {
             this.props[key] = value;
-            this.options.data.wwObject.content.data[key] = value;
+            this.options.data.wwObject.data[key] = value;
 
             this.updateWwObject();
             this.$forceUpdate();
@@ -187,7 +187,7 @@ export default {
         this.options.data.wwObject.uniqueId = wwLib.wwUtils.getUniqueId();
 
         for (let key in this.props) {
-            this.props[key] = this.options.data.wwObject.content.data[key] || this.props[key];
+            this.props[key] = this.options.data.wwObject.data[key] || this.props[key];
         }
     },
     beforeDestroy() {

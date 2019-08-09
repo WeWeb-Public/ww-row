@@ -3,8 +3,8 @@
         <!-- wwManager:start -->
         <div class="borders"></div>
         <!-- wwManager:end -->
-        <wwLayoutRow tag="div" :align="wwObject.content.data.align" :wrap="wwObject.content.data.wrap" :justify="wwObject.content.data.justify" ww-default="ww-button" :ww-list="wwObject.content.data.wwObjects" @ww-add="wwAdd($event)" @ww-remove="wwRemove($event)">
-            <wwObject v-for="wwObj in wwObject.content.data.wwObjects" :key="wwObj.uniqueId" :ww-object="wwObj"></wwObject>
+        <wwLayoutRow tag="div" :align="wwObject.data.align" :wrap="wwObject.data.wrap" :justify="wwObject.data.justify" ww-default="ww-button" :ww-list="wwObject.data.wwObjects" @ww-add="wwAdd($event)" @ww-remove="wwRemove($event)">
+            <wwObject v-for="wwObj in wwObject.data.wwObjects" :key="wwObj.uniqueId" :ww-object="wwObj"></wwObject>
         </wwLayoutRow>
     </div>
 </template>
@@ -55,11 +55,11 @@ export default {
 
 
         wwAdd(options) {
-            this.wwObject.content.data.wwObjects.splice(options.index, 0, options.wwObject);
+            this.wwObject.data.wwObjects.splice(options.index, 0, options.wwObject);
             this.wwObjectCtrl.update(this.wwObject);
         },
         wwRemove(options) {
-            this.wwObject.content.data.wwObjects.splice(options.index, 1);
+            this.wwObject.data.wwObjects.splice(options.index, 1);
             this.wwObjectCtrl.update(this.wwObject);
         },
 
@@ -113,13 +113,13 @@ export default {
                   STYLE
                 \================================================================================================*/
                 if (typeof (result.align) != 'undefined') {
-                    this.wwObject.content.data.align = result.align;
+                    this.wwObject.data.align = result.align;
                 }
                 if (typeof (result.justify) != 'undefined') {
-                    this.wwObject.content.data.justify = result.justify;
+                    this.wwObject.data.justify = result.justify;
                 }
                 if (typeof (result.wrap) != 'undefined') {
-                    this.wwObject.content.data.wrap = result.wrap;
+                    this.wwObject.data.wrap = result.wrap;
                 }
 
                 this.wwObjectCtrl.update(this.wwObject);
